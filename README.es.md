@@ -188,7 +188,34 @@ personalizado (`vitest.emoji-reporter.ts`).
 
 ---
 
-## 6. Notas
+## 6. Decisiones técnicas
+
+### 6.1 Arquitectura
+
+El backend sigue Clean Architecture, con dependencias en una sola dirección
+desde las capas externas hacia el centro:
+
+- `TaskPage.Domain`: entidades, enumeraciones y excepciones de dominio
+  (sin dependencias).
+- `TaskPage.Application`: casos de uso, DTOs, validación, filtros e interfaces de
+  repositorio.
+- `TaskPage.Infrastructure`: persistencia con EF Core e implementaciones de
+  repositorio.
+- `TaskPage.Api`: controladores, middleware y el pipeline HTTP.
+
+### 6.2 Reglas de negocio implementadas
+
+Las capas de dominio y aplicación son dueñas de las reglas de negocio:
+
+- El título de la tarea es obligatorio (1-200 caracteres).
+- Toda tarea debe tener un usuario asignado que ya exista.
+- Cambiar una tarea directamente de Pending a Done se rechaza: debe pasar primero
+  por InProgress.
+- Un usuario con tareas asociadas no se puede eliminar (409 Conflict).
+- El correo se normaliza (recorta espacios y se pasa a minúsculas) y debe ser
+  único, comparado sin distinguir mayúsculas.
+
+## 7. Notas
 
 - El esquema de base de datos vive en un **único script idempotente**
   (`database/schema.sql`), que se puede ejecutar N veces sin efectos colaterales.
@@ -197,6 +224,6 @@ personalizado (`vitest.emoji-reporter.ts`).
 - El runner de pruebas del frontend es **Vitest 4.1.12** (configurado en `angular.json`
   con el reporter personalizado `vitest.emoji-reporter.ts`, que imprime ✅/❌ por spec).
 - Estado del proyecto: la configuración del entorno y la estructura del proyecto
-  están completas, y la **Fase 1 (esquema de base de datos)** está implementada.
-  Las capas de backend y frontend crecerán fase a fase según
-  [`plans/design.md`](plans/design.md:1).
+  están completas, y están implementadas la **Fase 1 (esquema de base de datos)**
+  y la **Fase 2 (capa de dominio y aplicación)**. Las capas de backend y frontend
+  seguirán creciendo fase a fase según [`plans/design.md`](plans/design.md:1).
