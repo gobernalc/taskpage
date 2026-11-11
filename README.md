@@ -188,7 +188,33 @@ through a custom reporter (`vitest.emoji-reporter.ts`).
 
 ---
 
-## 6. Notes
+## 6. Technical decisions
+
+### 6.1 Architecture
+
+The backend follows Clean Architecture, with one-way dependencies from the outer
+layers toward the center:
+
+- `TaskPage.Domain`: entities, enums and domain exceptions (no dependencies).
+- `TaskPage.Application`: use cases, DTOs, validation, filters and repository
+  interfaces.
+- `TaskPage.Infrastructure`: persistence with EF Core and repository
+  implementations.
+- `TaskPage.Api`: controllers, middleware and the HTTP pipeline.
+
+### 6.2 Implemented business rules
+
+The domain and application layers own the business rules:
+
+- The task title is required (1-200 characters).
+- Every task must have an assigned user that already exists.
+- Changing a task directly from Pending to Done is rejected: the task must pass
+  through InProgress first.
+- A user with associated tasks cannot be deleted (409 Conflict).
+- The email is normalized (trimmed and lowercased) and must be unique, compared
+  case-insensitively.
+
+## 7. Notes
 
 - The database schema lives in a **single idempotent script**
   (`database/schema.sql`), which can run N times without side effects.
@@ -196,6 +222,7 @@ through a custom reporter (`vitest.emoji-reporter.ts`).
   on their own SQL Server instance.
 - The frontend test runner is **Vitest 4.1.12** (configured in `angular.json` with
   the custom reporter `vitest.emoji-reporter.ts`, which prints ✅/❌ per spec).
-- Project status: environment and project structure setup are complete, and
-  **Phase 1 (database schema)** is implemented. Backend and frontend layers will
-  grow phase by phase according to [`plans/design.md`](plans/design.md:1).
+- Project status: the environment and project structure are set up, and
+  **Phase 1 (database schema)** and **Phase 2 (domain and application layer)** are
+  implemented. Backend and frontend layers will keep growing phase by phase
+  according to [`plans/design.md`](plans/design.md:1).
