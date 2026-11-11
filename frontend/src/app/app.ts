@@ -1,7 +1,7 @@
 import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-/** Componente raíz de la aplicación. */
+/** Root component of the application. */
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
@@ -10,6 +10,6 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.scss',
 })
 export class App {
-  /** Título de la aplicación expuesto a la plantilla. */
+  /** Application title exposed to the template. */
   protected readonly title = signal('frontend');
 }

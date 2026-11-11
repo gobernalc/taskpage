@@ -1,11 +1,7 @@
-// ------------------------------------------------------------------
-// Archivo: vitest.emoji-reporter.ts
-// Fecha  : 2026-11-11
-// Autor  : gobernalc
-// Resumen: Reporter de Vitest que imprime ✅/❌ por cada prueba.
-// ------------------------------------------------------------------
+// Vitest reporter that prints ✅/❌ for each test.
 import type { Reporter, TestCase } from 'vitest/node';
 
+/** Reports each test result as a ✅ or ❌ line in the console. */
 export default class EmojiReporter implements Reporter {
   onTestCaseResult(testCase: TestCase) {
     const state = testCase.result().state;

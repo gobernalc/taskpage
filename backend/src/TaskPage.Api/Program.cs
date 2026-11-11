@@ -1,11 +1,11 @@
-// Punto de entrada de la API: controladores, Swagger y pipeline HTTP.
+// API entry point: controllers, Swagger and HTTP pipeline.
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Registro de controladores (capa Api de Clean Architecture).
+// Register controllers (Api layer of Clean Architecture).
 builder.Services.AddControllers();
 
-// Configuración de Swagger para exponer y documentar todos los servicios.
+// Configure Swagger to expose and document every service.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -13,13 +13,13 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "TaskPage API",
         Version = "v1",
-        Description = "Servicios de la prueba técnica TaskPage."
+        Description = "TaskPage technical test services."
     });
 });
 
 var app = builder.Build();
 
-// Swagger disponible en /swagger (UI) y /swagger/v1/swagger.json (JSON).
+// Swagger is available at /swagger (UI) and /swagger/v1/swagger.json (JSON).
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
