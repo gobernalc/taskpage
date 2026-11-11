@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TaskPage.Api.Tests/TaskPage.Api.Tests.csproj" />
+    <Project Path="src/TaskPage.Api/TaskPage.Api.csproj" />
+    <Project Path="src/TaskPage.Application.Tests/TaskPage.Application.Tests.csproj" />
+    <Project Path="src/TaskPage.Application/TaskPage.Application.csproj" />
+    <Project Path="src/TaskPage.Domain/TaskPage.Domain.csproj" />
+    <Project Path="src/TaskPage.Infrastructure/TaskPage.Infrastructure.csproj" />
+  </Folder>
+</Solution>
