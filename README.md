@@ -2,12 +2,10 @@
 
 Prueba técnica: **API REST en .NET (Web API) + Angular + SQL Server**.
 
-Solución full-stack con backend en **.NET 10 (ASP.NET Core Web API)** bajo Clean
-Architecture, frontend **Angular 22** (standalone components + SCSS) y base de datos
-**SQL Server**. Toda la API queda expuesta y documentada en **Swagger**.
-
-> El catálogo de funcionalidades se refleja en Swagger (`/swagger`) una vez
-> implementados los servicios de la prueba.
+Solución full-stack para un sistema interno de gestión de tareas, con backend en
+**.NET 10 (ASP.NET Core Web API)** organizado con Clean Architecture, frontend
+**Angular 22** (standalone components + SCSS) y base de datos **SQL Server**. La API
+queda expuesta y documentada en **Swagger**.
 
 ---
 
@@ -30,7 +28,7 @@ Architecture, frontend **Angular 22** (standalone components + SCSS) y base de d
 ```text
 taskpage/
 ├── .gitignore
-├── README.md                   # único documento .md del proyecto
+├── README.md
 ├── database/
 │   └── schema.sql              # único script SQL idempotente
 ├── backend/                    # solución .NET (Clean Architecture)
@@ -75,8 +73,54 @@ sqlcmd -S localhost -E -i database\schema.sql
   `localhost\NOMBRE_INSTANCIA`.
 - `-E`: autenticación de Windows (cuenta actual como `sysadmin`).
 
-El script se puede ejecutar **N veces sin efectos colaterales** y funciona en
-cualquier instancia de SQL Server.
+El script crea la base de datos `TaskPageDb` (si no existe), las tablas `Users`
+y `Tasks` con sus claves primarias/foráneas, `CHECK`, `DEFAULT` y auditoría
+(`CreatedAt`/`UpdatedAt`), los índices para búsqueda y orden, y los datos semilla
+(2 usuarios y 3 tareas con `AdditionalData` en JSON). Se puede ejecutar
+**N veces sin efectos colaterales**: las tablas, restricciones, índices y el seed
+solo se crean/insertan la primera vez.
+
+- **`N'...'` (prefijo Unicode):** en SQL Server el prefijo `N` delante de una
+  cadena indica un literal `NVARCHAR` (Unicode). Se usa en las columnas de texto
+  (`Name`, `Email`, `Title`, `Status`, `AdditionalData`) para que los literales se
+  interpreten como Unicode y no se pierdan caracteres (acentos, `ñ`, etc.).
+- **Datos semilla opcionales:** el seed (2 usuarios y 3 tareas) es solo contenido
+  de demostración. Si no se desea, se puede comentar o eliminar la sección
+  "Datos semilla" del script sin afectar el esquema.
+
+Verificación rápida tras ejecutarlo:
+
+```bash
+sqlcmd -S localhost -E -d TaskPageDb -Q "SELECT COUNT(*) AS Usuarios FROM dbo.Users; SELECT COUNT(*) AS Tareas FROM dbo.Tasks;"
+```
+
+Consulta de ejemplo con JSON (`ISJSON`, `JSON_VALUE`, `JSON_QUERY`, `OPENJSON`
+y `JSON_MODIFY`) sobre la columna `Tasks.AdditionalData`:
+
+```sql
+-- Validar que el contenido es JSON válido
+SELECT Id, ISJSON(AdditionalData) AS EsJson FROM dbo.Tasks;
+
+-- Leer un campo del JSON (prioridad)
+SELECT Id, JSON_VALUE(AdditionalData, '$.priority') AS Priority FROM dbo.Tasks;
+
+-- Filtrar por un valor dentro del JSON (prioridad alta)
+SELECT Id, Title FROM dbo.Tasks
+WHERE JSON_VALUE(AdditionalData, '$.priority') = 'High';
+
+-- Extraer un objeto/array completo del JSON (etiquetas)
+SELECT Id, JSON_QUERY(AdditionalData, '$.tags') AS Tags FROM dbo.Tasks;
+
+-- Abrir el array del JSON como filas (una fila por etiqueta)
+SELECT t.Id, tag.[value] AS Tag
+FROM dbo.Tasks t
+CROSS APPLY OPENJSON(t.AdditionalData, '$.tags') AS tag;
+
+-- (Opcional) Actualizar un campo del JSON
+UPDATE dbo.Tasks
+SET AdditionalData = JSON_MODIFY(AdditionalData, '$.estimatedCompletion', '2026-12-31')
+WHERE Id = 1;
+```
 
 ### 3.4 Configurar la cadena de conexión
 
@@ -105,7 +149,6 @@ dotnet run
 ```
 
 Abrir Swagger en: <http://localhost:5000/swagger> (o el puerto que indique la consola).
-Desde la UI de Swagger se pueden probar todos los servicios de la API.
 
 ### 4.2 Frontend
 
@@ -144,8 +187,8 @@ personalizado (`vitest.emoji-reporter.ts`).
 
 ## 6. Notas
 
-- El esquema completo de base de datos vive en un **único script idempotente**
-  (`database/schema.sql`) con tablas, claves, CHECK, DEFAULT, índices y datos semilla.
+- El esquema de base de datos vive en un **único script idempotente**
+  (`database/schema.sql`), que se puede ejecutar N veces sin efectos colaterales.
 - La cadena de conexión es configurable para que cualquier evaluador pueda montar la
   base de datos en su propia instancia de SQL Server.
 - El runner de pruebas del frontend es **Vitest 4.1.12** (configurado en `angular.json`
