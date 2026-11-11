@@ -1,19 +1,9 @@
-// ------------------------------------------------------------------
-// Clase  : PipelineTests
-// Fecha  : 2026-11-11
-// Autor  : gobernalc
-// Resumen: Prueba de humo para validar el pipeline de pruebas.
-// ------------------------------------------------------------------
 namespace TaskPage.Api.Tests;
 
+/// <summary>Prueba de humo para validar el pipeline de pruebas.</summary>
 public class PipelineTests : TestBase
 {
-    /// ------------------------------------------------------------------
-    /// Método : DebeValidarElPipelineDePruebas
-    /// Fecha  : 2026-11-11
-    /// Autor  : gobernalc
-    /// Resumen: Verifica que el runner ejecuta y reporta correctamente.
-    /// ------------------------------------------------------------------
+    /// <summary>Verifica que el runner ejecuta y reporta correctamente.</summary>
     [Fact]
     public void DebeValidarElPipelineDePruebas()
     {
