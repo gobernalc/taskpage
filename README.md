@@ -214,6 +214,31 @@ The domain and application layers own the business rules:
 - The email is normalized (trimmed and lowercased) and must be unique, compared
   case-insensitively.
 
+### 6.3 Persistence (EF Core)
+
+The infrastructure layer persists data with **EF Core 10** and the SQL Server
+provider. The [`AppDbContext`](backend/src/TaskPage.Infrastructure/Persistence/AppDbContext.cs:1)
+maps the `User` and `TaskItem` entities to the `Users` and `Tasks` tables through
+[`UserConfiguration`](backend/src/TaskPage.Infrastructure/Persistence/Configurations/UserConfiguration.cs:1)
+and [`TaskConfiguration`](backend/src/TaskPage.Infrastructure/Persistence/Configurations/TaskConfiguration.cs:1):
+keys, required columns, maximum lengths, the `TaskState` string conversion,
+relationships and indexes stay aligned with [`database/schema.sql`](database/schema.sql:1).
+
+- [`UserRepository`](backend/src/TaskPage.Infrastructure/Repositories/UserRepository.cs:1)
+  and [`TaskRepository`](backend/src/TaskPage.Infrastructure/Repositories/TaskRepository.cs:1)
+  implement the application interfaces `IUserRepository` and `ITaskRepository`.
+- The task listing supports **filtering** (status and assigned user), **search**
+  (title), **sorting** (title, status and creation date) and **pagination**.
+- The priority filter reads the JSON column with the native function
+  **`JSON_VALUE(AdditionalData, '$.priority')`**, translated by EF Core through a
+  mapped database function so the query stays parameterized.
+- [`DependencyInjection.cs`](backend/src/TaskPage.Infrastructure/DependencyInjection.cs:1)
+  exposes `AddInfrastructure`, which registers `AppDbContext` with the
+  `DefaultConnection` connection string and the repositories as scoped services.
+- The physical schema remains owned by [`database/schema.sql`](database/schema.sql:1)
+  (single idempotent script): EF Core is used for queries and commands, not to
+  generate the schema.
+
 ## 7. Branching and delivery
 
 The repository follows **trunk-based development**:
@@ -251,6 +276,6 @@ git switch main && git pull --ff-only
 - The frontend test runner is **Vitest 4.1.12** (configured in `angular.json` with
   the custom reporter `vitest.emoji-reporter.ts`, which prints ✅/❌ per spec).
 - Project status: the environment and project structure are set up, and
-  **Phase 1 (database schema)** and **Phase 2 (domain and application layer)** are
-  implemented. Backend and frontend layers will keep growing phase by phase
-  according to [`plans/design.md`](plans/design.md:1).
+  **Phase 1 (database schema)**, **Phase 2 (domain and application layer)** and
+  **Phase 3 (SQL Server persistence)** are implemented. Backend and frontend layers
+  will keep growing phase by phase according to [`plans/design.md`](plans/design.md:1).

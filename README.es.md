@@ -215,6 +215,34 @@ Las capas de dominio y aplicación son dueñas de las reglas de negocio:
 - El correo se normaliza (recorta espacios y se pasa a minúsculas) y debe ser
   único, comparado sin distinguir mayúsculas.
 
+### 6.3 Persistencia (EF Core)
+
+La capa de infraestructura persiste los datos con **EF Core 10** y el proveedor
+de SQL Server. El [`AppDbContext`](backend/src/TaskPage.Infrastructure/Persistence/AppDbContext.cs:1)
+mapea las entidades `User` y `TaskItem` a las tablas `Users` y `Tasks` mediante
+[`UserConfiguration`](backend/src/TaskPage.Infrastructure/Persistence/Configurations/UserConfiguration.cs:1)
+y [`TaskConfiguration`](backend/src/TaskPage.Infrastructure/Persistence/Configurations/TaskConfiguration.cs:1):
+claves, columnas obligatorias, longitudes máximas, la conversión del enum
+`TaskState` a texto, relaciones e índices quedan alineados con
+[`database/schema.sql`](database/schema.sql:1).
+
+- [`UserRepository`](backend/src/TaskPage.Infrastructure/Repositories/UserRepository.cs:1)
+  y [`TaskRepository`](backend/src/TaskPage.Infrastructure/Repositories/TaskRepository.cs:1)
+  implementan las interfaces de la aplicación `IUserRepository` e
+  `ITaskRepository`.
+- El listado de tareas admite **filtros** (estado y usuario asignado),
+  **búsqueda** (título), **orden** (título, estado y fecha de creación) y
+  **paginación**.
+- El filtro de prioridad lee la columna JSON con la función nativa
+  **`JSON_VALUE(AdditionalData, '$.priority')`**, traducida por EF Core mediante
+  una función de base de datos mapeada para que la consulta siga parametrizada.
+- [`DependencyInjection.cs`](backend/src/TaskPage.Infrastructure/DependencyInjection.cs:1)
+  expone `AddInfrastructure`, que registra `AppDbContext` con la cadena de conexión
+  `DefaultConnection` y los repositorios como servicios scoped.
+- El esquema físico sigue perteneciendo a [`database/schema.sql`](database/schema.sql:1)
+  (único script idempotente): EF Core se usa para consultas y comandos, no para
+  generar el esquema.
+
 ## 7. Ramas y entrega
 
 El repositorio sigue **trunk-based development**:
@@ -253,6 +281,7 @@ git switch main && git pull --ff-only
 - El runner de pruebas del frontend es **Vitest 4.1.12** (configurado en `angular.json`
   con el reporter personalizado `vitest.emoji-reporter.ts`, que imprime ✅/❌ por spec).
 - Estado del proyecto: la configuración del entorno y la estructura del proyecto
-  están completas, y están implementadas la **Fase 1 (esquema de base de datos)**
-  y la **Fase 2 (capa de dominio y aplicación)**. Las capas de backend y frontend
+  están completas, y están implementadas la **Fase 1 (esquema de base de datos)**,
+  la **Fase 2 (capa de dominio y aplicación)** y la
+  **Fase 3 (persistencia en SQL Server)**. Las capas de backend y frontend
   seguirán creciendo fase a fase según [`plans/design.md`](plans/design.md:1).
