@@ -3,8 +3,8 @@
 Prueba técnica: **API REST en .NET (Web API) + Angular + SQL Server**.
 
 Solución full-stack con backend en **.NET 10 (ASP.NET Core Web API)** bajo Clean
-Architecture, frontend **Angular 21** (standalone components + SCSS) y base de datos
-**SQL Server 2022**. Toda la API queda expuesta y documentada en **Swagger**.
+Architecture, frontend **Angular 22** (standalone components + SCSS) y base de datos
+**SQL Server**. Toda la API queda expuesta y documentada en **Swagger**.
 
 > El catálogo de funcionalidades se refleja en Swagger (`/swagger`) una vez
 > implementados los servicios de la prueba.
@@ -15,11 +15,11 @@ Architecture, frontend **Angular 21** (standalone components + SCSS) y base de d
 
 | Herramienta        | Versión verificada                                                        |
 | ------------------ | ------------------------------------------------------------------------- |
-| Node.js            | 22.17.1 (LTS)                                                             |
-| npm                | 10.9.2                                                                    |
+| Node.js            | 22.23.4 (LTS)                                                             |
+| npm                | 10.9.9                                                                    |
 | .NET SDK           | 10.0.101 (.NET 10 LTS)                                                    |
-| Angular CLI        | 21.2.29 (global)                                                          |
-| SQL Server         | 2022 Developer o Express                                                  |
+| Angular CLI        | 22.2.6                                                                    |
+| SQL Server         | 2022 o superior (verificado con 2025 Developer)                           |
 | sqlcmd             | utilidad de línea de comandos de SQL Server                               |
 | Visual Studio Code | con extensiones C# Dev Kit, Angular Language Service y SQL Server (mssql) |
 
@@ -56,12 +56,19 @@ cd taskpage/backend
 dotnet restore
 ```
 
-### 3.2 Crear la base de datos
+### 3.2 Instalar dependencias del frontend
+
+```bash
+cd taskpage/frontend
+npm install --legacy-peer-deps
+```
+
+### 3.3 Crear la base de datos
 
 Ejecutar el script idempotente en una instancia local de SQL Server:
 
 ```bash
-sqlcmd -S localhost -E -i ..\database\schema.sql
+sqlcmd -S localhost -E -i database\schema.sql
 ```
 
 - `-S localhost`: instancia por defecto. Si tu instancia es nombrada, usa
@@ -71,7 +78,7 @@ sqlcmd -S localhost -E -i ..\database\schema.sql
 El script se puede ejecutar **N veces sin efectos colaterales** y funciona en
 cualquier instancia de SQL Server.
 
-### 3.3 Configurar la cadena de conexión
+### 3.4 Configurar la cadena de conexión
 
 En `backend/src/TaskPage.Api/appsettings.Development.json`:
 
@@ -100,6 +107,15 @@ dotnet run
 Abrir Swagger en: <http://localhost:5000/swagger> (o el puerto que indique la consola).
 Desde la UI de Swagger se pueden probar todos los servicios de la API.
 
+### 4.2 Frontend
+
+```bash
+cd frontend
+ng serve
+```
+
+Abrir la aplicación en <http://localhost:4200>.
+
 ---
 
 ## 5. Pruebas
@@ -108,19 +124,21 @@ Desde la UI de Swagger se pueden probar todos los servicios de la API.
 
 ```bash
 cd backend
-dotnet test
+dotnet test --logger "console;verbosity=detailed"
 ```
 
-Cada test imprime en consola **✅ si pasa** y **❌ si falla**, con descripción y un flujo legible del resultado de cada prueba.
+Cada test imprime en consola **✅ si pasa** y **❌ si falla**, con descripción
+y un flujo legible del resultado de cada prueba.
 
 ### 5.2 Pruebas del frontend
 
 ```bash
 cd frontend
-ng test
+ng test --watch=false
 ```
 
-Cada spec imprime en consola **✅ si pasa** y **❌ si falla**.
+Cada spec imprime en consola **✅ si pasa** y **❌ si falla** mediante un reporter
+personalizado (`vitest.emoji-reporter.ts`).
 
 ---
 
@@ -130,3 +148,5 @@ Cada spec imprime en consola **✅ si pasa** y **❌ si falla**.
   (`database/schema.sql`) con tablas, claves, CHECK, DEFAULT, índices y datos semilla.
 - La cadena de conexión es configurable para que cualquier evaluador pueda montar la
   base de datos en su propia instancia de SQL Server.
+- El runner de pruebas del frontend es **Vitest 4.1.12** (configurado en `angular.json`
+  con el reporter personalizado `vitest.emoji-reporter.ts`, que imprime ✅/❌ por spec).
