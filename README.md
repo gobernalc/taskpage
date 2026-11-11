@@ -214,7 +214,35 @@ The domain and application layers own the business rules:
 - The email is normalized (trimmed and lowercased) and must be unique, compared
   case-insensitively.
 
-## 7. Notes
+## 7. Branching and delivery
+
+The repository follows **trunk-based development**:
+
+- `main` is the only long-lived branch and it is always green and releasable.
+  There is no `dev` or `qa` branch.
+- Every change lives in a short-lived branch created from an up-to-date `main`:
+  `feat/<slug>`, `fix/<slug>`, `chore/<slug>`, `docs/<slug>` or `test/<slug>`.
+  A branch lives two days at most and keeps the diff around 400 lines.
+- The branch reaches `main` through a pull request with one approving review from
+  the tech lead, a green CI run, a squash merge and immediate deletion of the
+  branch. `main` is protected: no direct pushes and no force pushes.
+- A release is a semver tag (`vMAJOR.MINOR.PATCH`) created on `main`. Environments
+  are deployment targets configured with environment variables, not branches.
+- Hotfixes branch from the affected tag as `fix/<slug>`, reach `main` through a
+  pull request and produce a patch tag.
+
+Daily flow:
+
+```bash
+git switch main && git pull --ff-only
+git switch -c feat/task-status-transition
+# work, commit and push
+git push -u origin feat/task-status-transition
+# open the pull request against main, squash merge and delete the branch
+git switch main && git pull --ff-only
+```
+
+## 8. Notes
 
 - The database schema lives in a **single idempotent script**
   (`database/schema.sql`), which can run N times without side effects.
