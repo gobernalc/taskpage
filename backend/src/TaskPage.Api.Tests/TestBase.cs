@@ -5,13 +5,13 @@ using Xunit;
 namespace TaskPage.Api.Tests;
 
 /// <summary>
-/// Clase base para las pruebas que imprime el resultado con ✅ o ❌ en consola.
+/// Base class for tests that prints the result with ✅ or ❌ to the console.
 /// </summary>
 public abstract class TestBase
 {
-    /// <summary>Ejecuta una prueba e imprime ✅ si pasa o ❌ si falla.</summary>
-    /// <param name="description">Descripción de la prueba.</param>
-    /// <param name="test">Cuerpo de la prueba a ejecutar.</param>
+    /// <summary>Runs a test and prints ✅ when it passes or ❌ when it fails.</summary>
+    /// <param name="description">Test description.</param>
+    /// <param name="test">Test body to run.</param>
     protected void Run(string description, Action test)
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;

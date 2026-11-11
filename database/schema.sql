@@ -1,15 +1,14 @@
 -- ==================================================================
--- Script : database/schema.sql
--- Resumen: Esquema único e idempotente de la base de datos TaskPage.
---          Crea la base de datos, las tablas Users y Tasks (con PK,
---          FK, CHECK, DEFAULT y auditoría), los índices y los datos
---          semilla opcionales. Debe poder ejecutarse N veces sin
---          efectos colaterales y funcionar en cualquier instancia de
---          SQL Server.
+-- Script  : database/schema.sql
+-- Summary : Single, idempotent schema for the TaskPage database.
+--           Creates the database, the Users and Tasks tables (with PK,
+--           FK, CHECK, DEFAULT and audit columns), the indexes and the
+--           optional seed data. It must run N times without side
+--           effects and work on any SQL Server instance.
 -- ==================================================================
 -- ------------------------------------------------------------------
--- Sección 1: creación de la base de datos.
--- Crea la base de datos TaskPageDb si todavía no existe.
+-- Section 1: database creation.
+-- Creates the TaskPageDb database if it does not exist yet.
 -- ------------------------------------------------------------------
 IF DB_ID(N'TaskPageDb') IS NULL
     BEGIN
@@ -23,36 +22,36 @@ USE TaskPageDb;
 
 GO
 -- ------------------------------------------------------------------
--- Sección 2: tablas.
--- Crea las tablas Users y Tasks con sus claves primarias, foráneas,
--- CHECK y DEFAULT. La creación es condicional para que el script sea
--- idempotente.
+-- Section 2: tables.
+-- Creates the Users and Tasks tables with their primary keys, foreign
+-- keys, CHECK and DEFAULT constraints. Creation is conditional so the
+-- script stays idempotent.
 -- ------------------------------------------------------------------
--- Tabla Users: colaboradores del sistema.
+-- Users table: system collaborators.
 IF OBJECT_ID(N'dbo.Users', N'U') IS NULL
     BEGIN
         CREATE TABLE dbo.Users (
-            Id        INT            IDENTITY (1, 1) NOT NULL CONSTRAINT PK_Users PRIMARY KEY, -- PK clustered sobre Id
-            Name      NVARCHAR (100) NOT NULL, -- Nombre del colaborador
-            Email     NVARCHAR (200) NOT NULL CONSTRAINT UQ_Users_Email UNIQUE, -- Correo único
+            Id        INT            IDENTITY (1, 1) NOT NULL CONSTRAINT PK_Users PRIMARY KEY, -- Clustered PK on Id
+            Name      NVARCHAR (100) NOT NULL, -- Collaborator name
+            Email     NVARCHAR (200) NOT NULL CONSTRAINT UQ_Users_Email UNIQUE, -- Unique email
             CreatedAt DATETIME2 (0)  CONSTRAINT DF_Users_CreatedAt DEFAULT (SYSUTCDATETIME()) NOT NULL,
-            UpdatedAt DATETIME2 (0)  NULL -- Fecha de última modificación
+            UpdatedAt DATETIME2 (0)  NULL -- Last modification date
         );
     END
 
 
 GO
--- Tabla Tasks: tareas con información adicional en JSON.
+-- Tasks table: tasks with additional information stored as JSON.
 IF OBJECT_ID(N'dbo.Tasks', N'U') IS NULL
     BEGIN
         CREATE TABLE dbo.Tasks (
-            Id             INT            IDENTITY (1, 1) NOT NULL CONSTRAINT PK_Tasks PRIMARY KEY, -- PK clustered sobre Id
-            Title          NVARCHAR (200) NOT NULL, -- Título obligatorio
+            Id             INT            IDENTITY (1, 1) NOT NULL CONSTRAINT PK_Tasks PRIMARY KEY, -- Clustered PK on Id
+            Title          NVARCHAR (200) NOT NULL, -- Required title
             Status         NVARCHAR (20)  CONSTRAINT DF_Tasks_Status DEFAULT (N'Pending') NOT NULL, -- Pending / InProgress / Done
-            UserId         INT            NOT NULL, -- Usuario asignado
+            UserId         INT            NOT NULL, -- Assigned user
             CreatedAt      DATETIME2 (0)  CONSTRAINT DF_Tasks_CreatedAt DEFAULT (SYSUTCDATETIME()) NOT NULL,
-            UpdatedAt      DATETIME2 (0)  NULL, -- Fecha de última modificación
-            AdditionalData NVARCHAR (MAX) NULL, -- JSON adicional
+            UpdatedAt      DATETIME2 (0)  NULL, -- Last modification date
+            AdditionalData NVARCHAR (MAX) NULL, -- Additional JSON
             CONSTRAINT FK_Tasks_Users FOREIGN KEY (UserId) REFERENCES dbo.Users (Id),
             CONSTRAINT CK_Tasks_Status CHECK (Status IN (N'Pending', N'InProgress', N'Done')),
             CONSTRAINT CK_Tasks_AdditionalData_IsJson CHECK (AdditionalData IS NULL
@@ -63,13 +62,13 @@ IF OBJECT_ID(N'dbo.Tasks', N'U') IS NULL
 
 GO
 -- ------------------------------------------------------------------
--- Sección 3: índices.
--- Crea los índices nonclustered necesarios para búsqueda, orden y
--- filtros. La creación condicional se ejecuta de forma dinámica porque
--- CREATE INDEX inicia su propio lote.
+-- Section 3: indexes.
+-- Creates the nonclustered indexes required for search, sorting and
+-- filters. Conditional creation runs dynamically because CREATE INDEX
+-- starts its own batch.
 -- ------------------------------------------------------------------
--- Índice compuesto que sirve a la consulta de tareas por usuario,
--- estado y orden por fecha de creación descendente.
+-- Composite index that serves the query for tasks by user, status and
+-- creation date in descending order.
 IF NOT EXISTS (SELECT 1
                FROM   sys.indexes
                WHERE  name = N'IX_Tasks_UserId_Status_CreatedAt'
@@ -81,7 +80,7 @@ IF NOT EXISTS (SELECT 1
 
 
 GO
--- Índice para el filtro por estado.
+-- Index for the status filter.
 IF NOT EXISTS (SELECT 1
                FROM   sys.indexes
                WHERE  name = N'IX_Tasks_Status'
@@ -93,7 +92,7 @@ IF NOT EXISTS (SELECT 1
 
 
 GO
--- Índice para la búsqueda por texto en el título.
+-- Index for full text search on the title.
 IF NOT EXISTS (SELECT 1
                FROM   sys.indexes
                WHERE  name = N'IX_Tasks_Title'
@@ -105,7 +104,7 @@ IF NOT EXISTS (SELECT 1
 
 
 GO
--- Índice para la búsqueda y el orden por nombre de usuario.
+-- Index for search and sorting by user name.
 IF NOT EXISTS (SELECT 1
                FROM   sys.indexes
                WHERE  name = N'IX_Users_Name'
@@ -118,14 +117,14 @@ IF NOT EXISTS (SELECT 1
 
 GO
 -- ------------------------------------------------------------------
--- Sección 4: datos semilla (opcionales).
--- Inserta los usuarios y tareas de ejemplo una única vez. Son datos
--- OPCIONALES: si no se desean, basta con comentar o eliminar esta
--- sección completa; el esquema (tablas, restricciones e índices) no
--- depende de ellos. La condición por Email y por Title + UserId
--- garantiza que las ejecuciones repetidas no dupliquen datos.
+-- Section 4: seed data (optional).
+-- Inserts the sample users and tasks only once. This data is
+-- OPTIONAL: if it is not wanted, comment out or delete this whole
+-- section; the schema (tables, constraints and indexes) does not
+-- depend on it. The conditions on Email and on Title + UserId ensure
+-- that repeated executions do not duplicate data.
 -- ------------------------------------------------------------------
--- Usuario: Ana Pérez.
+-- User: Ana Pérez.
 IF NOT EXISTS (SELECT 1
                FROM   dbo.Users
                WHERE  Email = N'ana.perez@example.com')
@@ -139,7 +138,7 @@ IF NOT EXISTS (SELECT 1
 
 
 GO
--- Usuario: Luis Gómez.
+-- User: Luis Gómez.
 IF NOT EXISTS (SELECT 1
                FROM   dbo.Users
                WHERE  Email = N'luis.gomez@example.com')
@@ -153,10 +152,10 @@ IF NOT EXISTS (SELECT 1
 
 
 GO
--- Tarea 1: estado Pending, asignada a Ana Pérez.
+-- Task 1: Pending status, assigned to Ana Pérez.
 IF NOT EXISTS (SELECT 1
                FROM   dbo.Tasks
-               WHERE  Title = N'Diseñar modelo de datos'
+               WHERE  Title = N'Design data model'
                       AND UserId = (SELECT Id
                                     FROM   dbo.Users
                                     WHERE  Email = N'ana.perez@example.com'))
@@ -167,17 +166,17 @@ IF NOT EXISTS (SELECT 1
             UserId,
             AdditionalData
         )
-        VALUES                 (N'Diseñar modelo de datos', N'Pending', (SELECT Id
-                                                                         FROM   dbo.Users
-                                                                         WHERE  Email = N'ana.perez@example.com'), N'{"priority":"High","estimatedCompletion":"2026-12-15","tags":["backend","urgent"],"notes":"Revisar integración con la API"}');
+        VALUES                 (N'Design data model', N'Pending', (SELECT Id
+                                                                   FROM   dbo.Users
+                                                                   WHERE  Email = N'ana.perez@example.com'), N'{"priority":"High","estimatedCompletion":"2026-12-15","tags":["backend","urgent"],"notes":"Review API integration"}');
     END
 
 
 GO
--- Tarea 2: estado InProgress, asignada a Luis Gómez.
+-- Task 2: InProgress status, assigned to Luis Gómez.
 IF NOT EXISTS (SELECT 1
                FROM   dbo.Tasks
-               WHERE  Title = N'Implementar API de tareas'
+               WHERE  Title = N'Implement task API'
                       AND UserId = (SELECT Id
                                     FROM   dbo.Users
                                     WHERE  Email = N'luis.gomez@example.com'))
@@ -188,17 +187,17 @@ IF NOT EXISTS (SELECT 1
             UserId,
             AdditionalData
         )
-        VALUES                 (N'Implementar API de tareas', N'InProgress', (SELECT Id
-                                                                              FROM   dbo.Users
-                                                                              WHERE  Email = N'luis.gomez@example.com'), N'{"priority":"Medium","estimatedCompletion":"2026-11-30","tags":["api","dotnet"],"notes":"Exponer CRUD en Swagger"}');
+        VALUES                 (N'Implement task API', N'InProgress', (SELECT Id
+                                                                       FROM   dbo.Users
+                                                                       WHERE  Email = N'luis.gomez@example.com'), N'{"priority":"Medium","estimatedCompletion":"2026-11-30","tags":["api","dotnet"],"notes":"Expose CRUD in Swagger"}');
     END
 
 
 GO
--- Tarea 3: estado Done, asignada a Ana Pérez.
+-- Task 3: Done status, assigned to Ana Pérez.
 IF NOT EXISTS (SELECT 1
                FROM   dbo.Tasks
-               WHERE  Title = N'Configurar entorno de desarrollo'
+               WHERE  Title = N'Set up development environment'
                       AND UserId = (SELECT Id
                                     FROM   dbo.Users
                                     WHERE  Email = N'ana.perez@example.com'))
@@ -209,33 +208,33 @@ IF NOT EXISTS (SELECT 1
             UserId,
             AdditionalData
         )
-        VALUES                 (N'Configurar entorno de desarrollo', N'Done', (SELECT Id
-                                                                               FROM   dbo.Users
-                                                                               WHERE  Email = N'ana.perez@example.com'), N'{"priority":"Low","estimatedCompletion":"2026-11-10","tags":["setup"],"notes":"SQL Server + VS Code"}');
+        VALUES                 (N'Set up development environment', N'Done', (SELECT Id
+                                                                             FROM   dbo.Users
+                                                                             WHERE  Email = N'ana.perez@example.com'), N'{"priority":"Low","estimatedCompletion":"2026-11-10","tags":["setup"],"notes":"SQL Server + VS Code"}');
     END
 
 
 -- ------------------------------------------------------------------
--- Sección 5: ejemplos de consultas con JSON en SQL Server.
--- Demuestra el uso de ISJSON, JSON_VALUE, JSON_QUERY, OPENJSON y
--- JSON_MODIFY sobre la columna AdditionalData. Los ejemplos quedan
--- comentados: son documentación y no se ejecutan (el UPDATE final
--- modificaría datos).
+-- Section 5: examples of JSON queries in SQL Server.
+-- Demonstrates the use of ISJSON, JSON_VALUE, JSON_QUERY, OPENJSON and
+-- JSON_MODIFY on the AdditionalData column. The examples are commented
+-- out: they are documentation and are not executed (the final UPDATE
+-- would modify data).
 -- ------------------------------------------------------------------
--- Validar que el contenido es JSON válido
--- SELECT Id, ISJSON(AdditionalData) AS EsJson FROM dbo.Tasks;
--- Leer un campo del JSON (prioridad)
+-- Validate that the content is valid JSON
+-- SELECT Id, ISJSON(AdditionalData) AS IsJson FROM dbo.Tasks;
+-- Read a field from the JSON (priority)
 -- SELECT Id, JSON_VALUE(AdditionalData, '$.priority') AS Priority FROM dbo.Tasks;
--- Filtrar por un valor dentro del JSON (prioridad alta)
+-- Filter by a value inside the JSON (high priority)
 -- SELECT Id, Title FROM dbo.Tasks
 -- WHERE JSON_VALUE(AdditionalData, '$.priority') = 'High';
--- Extraer un objeto/array completo del JSON (etiquetas)
+-- Extract a complete JSON object/array (tags)
 -- SELECT Id, JSON_QUERY(AdditionalData, '$.tags') AS Tags FROM dbo.Tasks;
--- Abrir el array del JSON como filas (una fila por etiqueta)
+-- Open the JSON array as rows (one row per tag)
 -- SELECT t.Id, tag.[value] AS Tag
 -- FROM dbo.Tasks t
 -- CROSS APPLY OPENJSON(t.AdditionalData, '$.tags') AS tag;
--- (Opcional) Actualizar un campo del JSON
+-- (Optional) Update a field in the JSON
 -- UPDATE dbo.Tasks
 -- SET AdditionalData = JSON_MODIFY(AdditionalData, '$.estimatedCompletion', '2026-12-31')
 -- WHERE Id = @TaskId;

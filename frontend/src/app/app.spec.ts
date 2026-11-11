@@ -1,4 +1,4 @@
-// Pruebas unitarias del componente raíz.
+// Unit tests for the root component.
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 
@@ -9,14 +9,14 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  /** Verifica que el componente raíz se instancia correctamente. */
+  /** Verifies that the root component is created correctly. */
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
-  /** Verifica que la plantilla muestra el título por defecto. */
+  /** Verifies that the template renders the default title. */
   it('should render title', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();

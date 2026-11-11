@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace TaskPage.Api.Controllers;
 
 /// <summary>
-/// Expone el estado de salud de la API para validar el arranque del servicio.
+/// Exposes the API health status to validate that the service starts correctly.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class HealthController : ControllerBase
 {
-    /// <summary>Devuelve el estado de salud del servicio.</summary>
-    /// <returns>Respuesta HTTP 200 con el estado del servicio.</returns>
+    /// <summary>Returns the health status of the service.</summary>
+    /// <returns>HTTP 200 response with the service status.</returns>
     [HttpGet]
     public IActionResult Get()
     {
