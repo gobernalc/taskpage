@@ -243,6 +243,39 @@ claves, columnas obligatorias, longitudes máximas, la conversión del enum
   (único script idempotente): EF Core se usa para consultas y comandos, no para
   generar el esquema.
 
+### 6.4 Documentación de la API
+
+La API REST queda expuesta y documentada en **Swagger** (UI en `/swagger`, JSON en
+`/swagger/v1/swagger.json`). Todos los endpoints se pueden probar desde la UI de
+Swagger y documentan sus modelos de entrada, parámetros de consulta y códigos de
+respuesta.
+
+| Método   | Ruta                     | Descripción                                                                      |
+| -------- | ------------------------ | -------------------------------------------------------------------------------- |
+| `POST`   | `/api/users`             | Crea un usuario (201 + `Location`, 400 validación, 409 correo duplicado).        |
+| `GET`    | `/api/users`             | Lista usuarios con búsqueda, orden y paginación (200).                           |
+| `GET`    | `/api/users/{id}`        | Obtiene un usuario por id (200, 404).                                            |
+| `PUT`    | `/api/users/{id}`        | Reemplaza el nombre y el correo de un usuario (200, 400, 404, 409).              |
+| `DELETE` | `/api/users/{id}`        | Elimina un usuario sin tareas asociadas (204, 404, 409).                         |
+| `POST`   | `/api/tasks`             | Crea una tarea asignada a un usuario (201 + `Location`, 400, 404).               |
+| `GET`    | `/api/tasks`             | Lista tareas con filtros, búsqueda, orden y paginación (200).                    |
+| `GET`    | `/api/tasks/{id}`        | Obtiene una tarea por id (200, 404).                                             |
+| `PUT`    | `/api/tasks/{id}`        | Reemplaza los valores editables de una tarea (200, 400, 404).                    |
+| `DELETE` | `/api/tasks/{id}`        | Elimina una tarea (204, 404).                                                    |
+| `PUT`    | `/api/tasks/{id}/status` | Cambia el estado de una tarea respetando la regla de transición (200, 400, 404). |
+| `GET`    | `/api/health`            | Informa el estado del servicio y de la base de datos (200, 503).                 |
+
+Comportamiento transversal:
+
+- Un [`GlobalExceptionMiddleware`](backend/src/TaskPage.Api/Middleware/GlobalExceptionMiddleware.cs:1)
+  global mapea las fallas de dominio y de validación a `ProblemDetails`
+  (400/404/409/500) sin exponer detalles internos.
+- Las respuestas de error incluyen la cabecera `X-Request-Id` y el identificador
+  de correlación en `ProblemDetails.Extensions`, bajo la clave `traceId`.
+- **Serilog** escribe logs estructurados en consola y en `logs/taskpage-.log`,
+  correlacionando cada evento con el `TraceIdentifier` de la petición y enmascarando
+  los datos sensibles.
+
 ## 7. Ramas y entrega
 
 El repositorio sigue **trunk-based development**:
@@ -282,6 +315,7 @@ git switch main && git pull --ff-only
   con el reporter personalizado `vitest.emoji-reporter.ts`, que imprime ✅/❌ por spec).
 - Estado del proyecto: la configuración del entorno y la estructura del proyecto
   están completas, y están implementadas la **Fase 1 (esquema de base de datos)**,
-  la **Fase 2 (capa de dominio y aplicación)** y la
-  **Fase 3 (persistencia en SQL Server)**. Las capas de backend y frontend
+  la **Fase 2 (capa de dominio y aplicación)**, la
+  **Fase 3 (persistencia en SQL Server)** y la
+  **Fase 4 (API REST con Swagger)**. Las capas de backend y frontend
   seguirán creciendo fase a fase según [`plans/design.md`](plans/design.md:1).

@@ -239,6 +239,38 @@ relationships and indexes stay aligned with [`database/schema.sql`](database/sch
   (single idempotent script): EF Core is used for queries and commands, not to
   generate the schema.
 
+### 6.4 API documentation
+
+The REST API is exposed and documented in **Swagger** (UI at `/swagger`, JSON at
+`/swagger/v1/swagger.json`). Every endpoint is testable from the Swagger UI and
+documents its request models, query parameters and response codes.
+
+| Method   | Route                    | Description                                                             |
+| -------- | ------------------------ | ----------------------------------------------------------------------- |
+| `POST`   | `/api/users`             | Creates a user (201 + `Location`, 400 validation, 409 duplicate email). |
+| `GET`    | `/api/users`             | Lists users with search, sorting and pagination (200).                  |
+| `GET`    | `/api/users/{id}`        | Gets a user by id (200, 404).                                           |
+| `PUT`    | `/api/users/{id}`        | Replaces the name and email of a user (200, 400, 404, 409).             |
+| `DELETE` | `/api/users/{id}`        | Deletes a user with no associated tasks (204, 404, 409).                |
+| `POST`   | `/api/tasks`             | Creates a task assigned to a user (201 + `Location`, 400, 404).         |
+| `GET`    | `/api/tasks`             | Lists tasks with filters, search, sorting and pagination (200).         |
+| `GET`    | `/api/tasks/{id}`        | Gets a task by id (200, 404).                                           |
+| `PUT`    | `/api/tasks/{id}`        | Replaces the editable values of a task (200, 400, 404).                 |
+| `DELETE` | `/api/tasks/{id}`        | Deletes a task (204, 404).                                              |
+| `PUT`    | `/api/tasks/{id}/status` | Changes a task status respecting the transition rule (200, 400, 404).   |
+| `GET`    | `/api/health`            | Reports the service and database health (200, 503).                     |
+
+Cross-cutting behavior:
+
+- A global [`GlobalExceptionMiddleware`](backend/src/TaskPage.Api/Middleware/GlobalExceptionMiddleware.cs:1)
+  maps domain and validation failures to `ProblemDetails` (400/404/409/500)
+  without exposing internal details.
+- Error responses include the `X-Request-Id` header and the correlation id in
+  `ProblemDetails.Extensions` under the `traceId` key.
+- **Serilog** writes structured logs to the console and `logs/taskpage-.log`,
+  correlating every event with the request `TraceIdentifier` and masking
+  sensitive data.
+
 ## 7. Branching and delivery
 
 The repository follows **trunk-based development**:
@@ -276,6 +308,7 @@ git switch main && git pull --ff-only
 - The frontend test runner is **Vitest 4.1.12** (configured in `angular.json` with
   the custom reporter `vitest.emoji-reporter.ts`, which prints ✅/❌ per spec).
 - Project status: the environment and project structure are set up, and
-  **Phase 1 (database schema)**, **Phase 2 (domain and application layer)** and
-  **Phase 3 (SQL Server persistence)** are implemented. Backend and frontend layers
-  will keep growing phase by phase according to [`plans/design.md`](plans/design.md:1).
+  **Phase 1 (database schema)**, **Phase 2 (domain and application layer)**,
+  **Phase 3 (SQL Server persistence)** and **Phase 4 (REST API with Swagger)** are
+  implemented. Backend and frontend layers will keep growing phase by phase
+  according to [`plans/design.md`](plans/design.md:1).
