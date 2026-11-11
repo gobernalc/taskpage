@@ -1,9 +1,4 @@
-// ------------------------------------------------------------------
-// Archivo: Program.cs
-// Fecha  : 2026-11-11
-// Autor  : gobernalc
-// Resumen: Punto de entrada de la API. Configura controladores y Swagger.
-// ------------------------------------------------------------------
+// Punto de entrada de la API: controladores, Swagger y pipeline HTTP.
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,23 +1,15 @@
-// ------------------------------------------------------------------
-// Clase  : TestBase
-// Fecha  : 2026-11-11
-// Autor  : gobernalc
-// Resumen: Clase base para pruebas que imprime el resultado.
-// ------------------------------------------------------------------
 using Xunit;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace TaskPage.Application.Tests;
 
+/// <summary>
+/// Clase base para las pruebas de la capa de aplicación con salida ✅/❌.
+/// </summary>
 public abstract class TestBase
 {
-    /// ------------------------------------------------------------------
-    /// Método : Run
-    /// Fecha  : 2026-11-11
-    /// Autor  : gobernalc
-    /// Resumen: Ejecuta una prueba e imprime ✅ si pasa o ❌ si falla.
-    /// ------------------------------------------------------------------
+    /// <summary>Ejecuta una prueba e imprime ✅ si pasa o ❌ si falla.</summary>
     /// <param name="description">Descripción en español de la prueba.</param>
     /// <param name="test">Cuerpo de la prueba a ejecutar.</param>
     protected void Run(string description, Action test)

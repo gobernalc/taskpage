@@ -1,18 +1,15 @@
 -- ==================================================================
--- Script  : database/schema.sql
--- Fecha   : 2026-11-11
--- Autor   : gobernalc
--- Resumen : Esquema único e idempotente de la base de datos TaskPage.
---           Crea la base de datos, las tablas Users y Tasks (con PK,
---           FK, CHECK, DEFAULT y auditoría), los índices y los datos
---           semilla opcionales. Debe poder ejecutarse N veces sin
---           efectos colaterales y funcionar en cualquier instancia de
---           SQL Server.
+-- Script : database/schema.sql
+-- Resumen: Esquema único e idempotente de la base de datos TaskPage.
+--          Crea la base de datos, las tablas Users y Tasks (con PK,
+--          FK, CHECK, DEFAULT y auditoría), los índices y los datos
+--          semilla opcionales. Debe poder ejecutarse N veces sin
+--          efectos colaterales y funcionar en cualquier instancia de
+--          SQL Server.
 -- ==================================================================
 -- ------------------------------------------------------------------
 -- Sección 1: creación de la base de datos.
--- Fecha : 2026-11-11 | Autor : gobernalc
--- Resumen: Crea la base de datos TaskPageDb si todavía no existe.
+-- Crea la base de datos TaskPageDb si todavía no existe.
 -- ------------------------------------------------------------------
 IF DB_ID(N'TaskPageDb') IS NULL
     BEGIN
@@ -27,10 +24,9 @@ USE TaskPageDb;
 GO
 -- ------------------------------------------------------------------
 -- Sección 2: tablas.
--- Fecha : 2026-11-11 | Autor : gobernalc
--- Resumen: Crea las tablas Users y Tasks con sus claves primarias,
---          foráneas, CHECK y DEFAULT. La creación es condicional para
---          que el script sea idempotente.
+-- Crea las tablas Users y Tasks con sus claves primarias, foráneas,
+-- CHECK y DEFAULT. La creación es condicional para que el script sea
+-- idempotente.
 -- ------------------------------------------------------------------
 -- Tabla Users: colaboradores del sistema.
 IF OBJECT_ID(N'dbo.Users', N'U') IS NULL
@@ -39,8 +35,7 @@ IF OBJECT_ID(N'dbo.Users', N'U') IS NULL
             Id        INT            IDENTITY (1, 1) NOT NULL CONSTRAINT PK_Users PRIMARY KEY, -- PK clustered sobre Id
             Name      NVARCHAR (100) NOT NULL, -- Nombre del colaborador
             Email     NVARCHAR (200) NOT NULL CONSTRAINT UQ_Users_Email UNIQUE, -- Correo único
-            CreatedAt DATETIME2 (0)  -- Fecha de creación
-            CONSTRAINT DF_Users_CreatedAt DEFAULT (SYSUTCDATETIME()) NOT NULL,
+            CreatedAt DATETIME2 (0)  CONSTRAINT DF_Users_CreatedAt DEFAULT (SYSUTCDATETIME()) NOT NULL,
             UpdatedAt DATETIME2 (0)  NULL -- Fecha de última modificación
         );
     END
@@ -53,11 +48,9 @@ IF OBJECT_ID(N'dbo.Tasks', N'U') IS NULL
         CREATE TABLE dbo.Tasks (
             Id             INT            IDENTITY (1, 1) NOT NULL CONSTRAINT PK_Tasks PRIMARY KEY, -- PK clustered sobre Id
             Title          NVARCHAR (200) NOT NULL, -- Título obligatorio
-            Status         NVARCHAR (20)  -- Pending / InProgress / Done
-            CONSTRAINT DF_Tasks_Status DEFAULT (N'Pending') NOT NULL,
+            Status         NVARCHAR (20)  CONSTRAINT DF_Tasks_Status DEFAULT (N'Pending') NOT NULL, -- Pending / InProgress / Done
             UserId         INT            NOT NULL, -- Usuario asignado
-            CreatedAt      DATETIME2 (0)  -- Fecha de creación
-            CONSTRAINT DF_Tasks_CreatedAt DEFAULT (SYSUTCDATETIME()) NOT NULL,
+            CreatedAt      DATETIME2 (0)  CONSTRAINT DF_Tasks_CreatedAt DEFAULT (SYSUTCDATETIME()) NOT NULL,
             UpdatedAt      DATETIME2 (0)  NULL, -- Fecha de última modificación
             AdditionalData NVARCHAR (MAX) NULL, -- JSON adicional
             CONSTRAINT FK_Tasks_Users FOREIGN KEY (UserId) REFERENCES dbo.Users (Id),
@@ -71,10 +64,9 @@ IF OBJECT_ID(N'dbo.Tasks', N'U') IS NULL
 GO
 -- ------------------------------------------------------------------
 -- Sección 3: índices.
--- Fecha : 2026-11-11 | Autor : gobernalc
--- Resumen: Crea los índices nonclustered necesarios para búsqueda,
---          orden y filtros. La creación condicional se ejecuta de forma
---          dinámica porque CREATE INDEX debe iniciar su propio lote.
+-- Crea los índices nonclustered necesarios para búsqueda, orden y
+-- filtros. La creación condicional se ejecuta de forma dinámica porque
+-- CREATE INDEX inicia su propio lote.
 -- ------------------------------------------------------------------
 -- Índice compuesto que sirve a la consulta de tareas por usuario,
 -- estado y orden por fecha de creación descendente.
@@ -127,14 +119,11 @@ IF NOT EXISTS (SELECT 1
 GO
 -- ------------------------------------------------------------------
 -- Sección 4: datos semilla (opcionales).
--- Fecha : 2026-11-11 | Autor : gobernalc
--- Resumen: Inserta los usuarios y tareas de ejemplo una única vez.
---          Estos datos son OPCIONALES: solo sirven para tener contenido
---          de demostración. Si no se desean, basta con comentar o
---          eliminar esta sección completa; el esquema (tablas,
---          restricciones e índices) no depende de ellos. La condición
---          por Email y por Title + UserId garantiza que las ejecuciones
---          repetidas no dupliquen datos.
+-- Inserta los usuarios y tareas de ejemplo una única vez. Son datos
+-- OPCIONALES: si no se desean, basta con comentar o eliminar esta
+-- sección completa; el esquema (tablas, restricciones e índices) no
+-- depende de ellos. La condición por Email y por Title + UserId
+-- garantiza que las ejecuciones repetidas no dupliquen datos.
 -- ------------------------------------------------------------------
 -- Usuario: Ana Pérez.
 IF NOT EXISTS (SELECT 1
@@ -228,11 +217,10 @@ IF NOT EXISTS (SELECT 1
 
 -- ------------------------------------------------------------------
 -- Sección 5: ejemplos de consultas con JSON en SQL Server.
--- Fecha : 2026-11-11 | Autor : gobernalc
--- Resumen: Demuestra el uso de ISJSON, JSON_VALUE, JSON_QUERY,
---          OPENJSON y JSON_MODIFY sobre la columna AdditionalData.
---          Estos ejemplos quedan comentados: son documentación y no se
---          ejecutan con el script (el UPDATE final modificaría datos).
+-- Demuestra el uso de ISJSON, JSON_VALUE, JSON_QUERY, OPENJSON y
+-- JSON_MODIFY sobre la columna AdditionalData. Los ejemplos quedan
+-- comentados: son documentación y no se ejecutan (el UPDATE final
+-- modificaría datos).
 -- ------------------------------------------------------------------
 -- Validar que el contenido es JSON válido
 -- SELECT Id, ISJSON(AdditionalData) AS EsJson FROM dbo.Tasks;
