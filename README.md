@@ -1,37 +1,40 @@
 # TaskPage
 
-Prueba técnica: **API REST en .NET (Web API) + Angular + SQL Server**.
+> For the Spanish version of this document, see [README.es.md](README.es.md).
 
-Solución full-stack para un sistema interno de gestión de tareas, con backend en
-**.NET 10 (ASP.NET Core Web API)** organizado con Clean Architecture, frontend
-**Angular 22** (standalone components + SCSS) y base de datos **SQL Server**. La API
-queda expuesta y documentada en **Swagger**.
+Technical test: **REST API in .NET (Web API) + Angular + SQL Server**.
 
----
-
-## 1. Requisitos previos
-
-| Herramienta        | Versión verificada                                                        |
-| ------------------ | ------------------------------------------------------------------------- |
-| Node.js            | 22.23.4 (LTS)                                                             |
-| npm                | 10.9.9                                                                    |
-| .NET SDK           | 10.0.101 (.NET 10 LTS)                                                    |
-| Angular CLI        | 22.2.6                                                                    |
-| SQL Server         | 2022 o superior (verificado con 2025 Developer)                           |
-| sqlcmd             | utilidad de línea de comandos de SQL Server                               |
-| Visual Studio Code | con extensiones C# Dev Kit, Angular Language Service y SQL Server (mssql) |
+Full-stack solution for an internal task management system, with a backend in
+**.NET 10 (ASP.NET Core Web API)** organized with Clean Architecture, a frontend in
+**Angular 22** (standalone components + SCSS) and a **SQL Server** database. The API
+is exposed and documented in **Swagger**.
 
 ---
 
-## 2. Estructura del repositorio
+## 1. Prerequisites
+
+| Tool               | Verified version                                                            |
+| ------------------ | --------------------------------------------------------------------------- |
+| Node.js            | 22.23.4 (LTS)                                                               |
+| npm                | 10.9.9                                                                      |
+| .NET SDK           | 10.0.101 (.NET 10 LTS)                                                      |
+| Angular CLI        | 22.2.6                                                                      |
+| SQL Server         | 2022 or later (verified with 2025 Developer)                                |
+| sqlcmd             | SQL Server command-line utility                                             |
+| Visual Studio Code | with C# Dev Kit, Angular Language Service and SQL Server (mssql) extensions |
+
+---
+
+## 2. Repository structure
 
 ```text
 taskpage/
 ├── .gitignore
 ├── README.md
+├── README.es.md                # Spanish mirror of this document
 ├── database/
-│   └── schema.sql              # único script SQL idempotente
-├── backend/                    # solución .NET (Clean Architecture)
+│   └── schema.sql              # single idempotent SQL script
+├── backend/                    # .NET solution (Clean Architecture)
 │   └── src/
 │       ├── TaskPage.Domain/
 │       ├── TaskPage.Application/
@@ -39,14 +42,14 @@ taskpage/
 │       ├── TaskPage.Api/
 │       ├── TaskPage.Application.Tests/
 │       └── TaskPage.Api.Tests/
-└── frontend/                   # aplicación Angular
+└── frontend/                   # Angular application
 ```
 
 ---
 
-## 3. Instalación y configuración paso a paso
+## 3. Step-by-step installation and configuration
 
-### 3.1 Clonar e instalar dependencias del backend
+### 3.1 Clone the repository and install backend dependencies
 
 ```bash
 git clone https://github.com/gobernalc/taskpage.git taskpage
@@ -54,77 +57,77 @@ cd taskpage/backend
 dotnet restore
 ```
 
-### 3.2 Instalar dependencias del frontend
+### 3.2 Install frontend dependencies
 
 ```bash
 cd taskpage/frontend
 npm install --legacy-peer-deps
 ```
 
-### 3.3 Crear la base de datos
+### 3.3 Create the database
 
-Ejecutar el script idempotente en una instancia local de SQL Server:
+Run the idempotent script on a local SQL Server instance:
 
 ```bash
 sqlcmd -S localhost -E -i database\schema.sql
 ```
 
-- `-S localhost`: instancia por defecto. Si tu instancia es nombrada, usa
-  `localhost\NOMBRE_INSTANCIA`.
-- `-E`: autenticación de Windows (cuenta actual como `sysadmin`).
+- `-S localhost`: default instance. If your instance is named, use
+  `localhost\INSTANCE_NAME`.
+- `-E`: Windows authentication (current account as `sysadmin`).
 
-El script crea la base de datos `TaskPageDb` (si no existe), las tablas `Users`
-y `Tasks` con sus claves primarias/foráneas, `CHECK`, `DEFAULT` y auditoría
-(`CreatedAt`/`UpdatedAt`), los índices para búsqueda y orden, y los datos semilla
-(2 usuarios y 3 tareas con `AdditionalData` en JSON). Se puede ejecutar
-**N veces sin efectos colaterales**: las tablas, restricciones, índices y el seed
-solo se crean/insertan la primera vez.
+The script creates the `TaskPageDb` database (if it does not exist), the `Users`
+and `Tasks` tables with their primary/foreign keys, `CHECK`, `DEFAULT` and audit
+columns (`CreatedAt`/`UpdatedAt`), the indexes for search and sorting, and the seed
+data (2 users and 3 tasks with `AdditionalData` in JSON). It can run **N times
+without side effects**: tables, constraints, indexes and seed data are only
+created/inserted the first time.
 
-- **`N'...'` (prefijo Unicode):** en SQL Server el prefijo `N` delante de una
-  cadena indica un literal `NVARCHAR` (Unicode). Se usa en las columnas de texto
-  (`Name`, `Email`, `Title`, `Status`, `AdditionalData`) para que los literales se
-  interpreten como Unicode y no se pierdan caracteres (acentos, `ñ`, etc.).
-- **Datos semilla opcionales:** el seed (2 usuarios y 3 tareas) es solo contenido
-  de demostración. Si no se desea, se puede comentar o eliminar la sección
-  "Datos semilla" del script sin afectar el esquema.
+- **`N'...'` (Unicode prefix):** in SQL Server the `N` prefix before a string
+  denotes an `NVARCHAR` (Unicode) literal. It is used on text columns (`Name`,
+  `Email`, `Title`, `Status`, `AdditionalData`) so the literals are interpreted as
+  Unicode and no characters are lost (accents, `ñ`, etc.).
+- **Optional seed data:** the seed (2 users and 3 tasks) is only demo content. If
+  it is not wanted, the "Seed data" section of the script can be commented out or
+  deleted without affecting the schema.
 
-Verificación rápida tras ejecutarlo:
+Quick verification after running it:
 
 ```bash
-sqlcmd -S localhost -E -d TaskPageDb -Q "SELECT COUNT(*) AS Usuarios FROM dbo.Users; SELECT COUNT(*) AS Tareas FROM dbo.Tasks;"
+sqlcmd -S localhost -E -d TaskPageDb -Q "SELECT COUNT(*) AS Users FROM dbo.Users; SELECT COUNT(*) AS Tasks FROM dbo.Tasks;"
 ```
 
-Consulta de ejemplo con JSON (`ISJSON`, `JSON_VALUE`, `JSON_QUERY`, `OPENJSON`
-y `JSON_MODIFY`) sobre la columna `Tasks.AdditionalData`:
+Sample JSON query (`ISJSON`, `JSON_VALUE`, `JSON_QUERY`, `OPENJSON` and
+`JSON_MODIFY`) on the `Tasks.AdditionalData` column:
 
 ```sql
--- Validar que el contenido es JSON válido
-SELECT Id, ISJSON(AdditionalData) AS EsJson FROM dbo.Tasks;
+-- Validate that the content is valid JSON
+SELECT Id, ISJSON(AdditionalData) AS IsJson FROM dbo.Tasks;
 
--- Leer un campo del JSON (prioridad)
+-- Read a field from the JSON (priority)
 SELECT Id, JSON_VALUE(AdditionalData, '$.priority') AS Priority FROM dbo.Tasks;
 
--- Filtrar por un valor dentro del JSON (prioridad alta)
+-- Filter by a value inside the JSON (high priority)
 SELECT Id, Title FROM dbo.Tasks
 WHERE JSON_VALUE(AdditionalData, '$.priority') = 'High';
 
--- Extraer un objeto/array completo del JSON (etiquetas)
+-- Extract a complete JSON object/array (tags)
 SELECT Id, JSON_QUERY(AdditionalData, '$.tags') AS Tags FROM dbo.Tasks;
 
--- Abrir el array del JSON como filas (una fila por etiqueta)
+-- Open the JSON array as rows (one row per tag)
 SELECT t.Id, tag.[value] AS Tag
 FROM dbo.Tasks t
 CROSS APPLY OPENJSON(t.AdditionalData, '$.tags') AS tag;
 
--- (Opcional) Actualizar un campo del JSON
+-- (Optional) Update a field in the JSON
 UPDATE dbo.Tasks
 SET AdditionalData = JSON_MODIFY(AdditionalData, '$.estimatedCompletion', '2026-12-31')
 WHERE Id = 1;
 ```
 
-### 3.4 Configurar la cadena de conexión
+### 3.4 Configure the connection string
 
-En `backend/src/TaskPage.Api/appsettings.Development.json`:
+In `backend/src/TaskPage.Api/appsettings.Development.json`:
 
 ```json
 {
@@ -134,12 +137,12 @@ En `backend/src/TaskPage.Api/appsettings.Development.json`:
 }
 ```
 
-También se puede configurar con la variable de entorno
-`ConnectionStrings__DefaultConnection` sin tocar el archivo.
+It can also be configured with the `ConnectionStrings__DefaultConnection`
+environment variable without touching the file.
 
 ---
 
-## 4. Ejecución
+## 4. Running the application
 
 ### 4.1 Backend (API + Swagger)
 
@@ -148,7 +151,7 @@ cd backend/src/TaskPage.Api
 dotnet run
 ```
 
-Abrir Swagger en: <http://localhost:5000/swagger> (o el puerto que indique la consola).
+Open Swagger at: <http://localhost:5000/swagger> (or the port shown in the console).
 
 ### 4.2 Frontend
 
@@ -157,39 +160,42 @@ cd frontend
 ng serve
 ```
 
-Abrir la aplicación en <http://localhost:4200>.
+Open the application at <http://localhost:4200>.
 
 ---
 
-## 5. Pruebas
+## 5. Tests
 
-### 5.1 Pruebas del backend
+### 5.1 Backend tests
 
 ```bash
 cd backend
 dotnet test --logger "console;verbosity=detailed"
 ```
 
-Cada test imprime en consola **✅ si pasa** y **❌ si falla**, con descripción
-y un flujo legible del resultado de cada prueba.
+Each test prints **✅ when it passes** and **❌ when it fails** to the console, with
+a description and a readable flow of each test result.
 
-### 5.2 Pruebas del frontend
+### 5.2 Frontend tests
 
 ```bash
 cd frontend
 ng test --watch=false
 ```
 
-Cada spec imprime en consola **✅ si pasa** y **❌ si falla** mediante un reporter
-personalizado (`vitest.emoji-reporter.ts`).
+Each spec prints **✅ when it passes** and **❌ when it fails** to the console
+through a custom reporter (`vitest.emoji-reporter.ts`).
 
 ---
 
-## 6. Notas
+## 6. Notes
 
-- El esquema de base de datos vive en un **único script idempotente**
-  (`database/schema.sql`), que se puede ejecutar N veces sin efectos colaterales.
-- La cadena de conexión es configurable para que cualquier evaluador pueda montar la
-  base de datos en su propia instancia de SQL Server.
-- El runner de pruebas del frontend es **Vitest 4.1.12** (configurado en `angular.json`
-  con el reporter personalizado `vitest.emoji-reporter.ts`, que imprime ✅/❌ por spec).
+- The database schema lives in a **single idempotent script**
+  (`database/schema.sql`), which can run N times without side effects.
+- The connection string is configurable so any evaluator can set up the database
+  on their own SQL Server instance.
+- The frontend test runner is **Vitest 4.1.12** (configured in `angular.json` with
+  the custom reporter `vitest.emoji-reporter.ts`, which prints ✅/❌ per spec).
+- Project status: environment and project structure setup are complete, and
+  **Phase 1 (database schema)** is implemented. Backend and frontend layers will
+  grow phase by phase according to [`plans/design.md`](plans/design.md:1).

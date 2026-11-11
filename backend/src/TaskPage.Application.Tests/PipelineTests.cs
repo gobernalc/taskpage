@@ -1,16 +1,16 @@
 namespace TaskPage.Application.Tests;
 
-/// <summary>Prueba de humo para validar el pipeline de pruebas.</summary>
+/// <summary>Smoke test that validates the test pipeline.</summary>
 public class PipelineTests : TestBase
 {
-    /// <summary>Verifica que el runner ejecuta y reporta correctamente.</summary>
+    /// <summary>Verifies that the runner executes and reports correctly.</summary>
     [Fact]
-    public void DebeValidarElPipelineDePruebas()
+    public void ShouldValidateTestingPipeline()
     {
-        Run("suma básica para validar el pipeline", () =>
+        Run("basic sum to validate the pipeline", () =>
         {
-            var resultado = 2 + 3;
-            Assert.Equal(5, resultado);
+            var result = 2 + 3;
+            Assert.Equal(5, result);
         });
     }
 }

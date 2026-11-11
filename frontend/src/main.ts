@@ -1,4 +1,4 @@
-// Arranca la aplicación Angular con la configuración global.
+// Bootstraps the Angular application with the global configuration.
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';

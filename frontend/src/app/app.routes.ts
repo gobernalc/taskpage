@@ -1,4 +1,4 @@
 import { Routes } from '@angular/router';
 
-/** Rutas raíz de la aplicación, aún sin features cargadas. */
+/** Root application routes, no features loaded yet. */
 export const routes: Routes = [];
