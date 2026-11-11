@@ -215,7 +215,36 @@ Las capas de dominio y aplicación son dueñas de las reglas de negocio:
 - El correo se normaliza (recorta espacios y se pasa a minúsculas) y debe ser
   único, comparado sin distinguir mayúsculas.
 
-## 7. Notas
+## 7. Ramas y entrega
+
+El repositorio sigue **trunk-based development**:
+
+- `main` es la única rama de larga vida y siempre está verde y desplegable. No
+  existen ramas `dev` ni `qa`.
+- Cada cambio vive en una rama corta creada desde `main` actualizado:
+  `feat/<slug>`, `fix/<slug>`, `chore/<slug>`, `docs/<slug>` o `test/<slug>`.
+  Una rama vive como máximo dos días y mantiene el diff alrededor de 400 líneas.
+- La rama llega a `main` mediante un pull request con una aprobación del tech lead,
+  el CI en verde, squash merge y borrado inmediato de la rama. `main` está
+  protegida: sin pushes directos y sin force pushes.
+- Una liberación es un tag semver (`vMAJOR.MINOR.PATCH`) creado sobre `main`. Los
+  entornos son destinos de despliegue configurados con variables de entorno, no
+  ramas.
+- Los hotfix salen del tag afectado como `fix/<slug>`, entran a `main` por pull
+  request y generan un tag de parche.
+
+Flujo diario:
+
+```bash
+git switch main && git pull --ff-only
+git switch -c feat/task-status-transition
+# trabajar, hacer commit y push
+git push -u origin feat/task-status-transition
+# abrir el pull request contra main, squash merge y borrar la rama
+git switch main && git pull --ff-only
+```
+
+## 8. Notas
 
 - El esquema de base de datos vive en un **único script idempotente**
   (`database/schema.sql`), que se puede ejecutar N veces sin efectos colaterales.
