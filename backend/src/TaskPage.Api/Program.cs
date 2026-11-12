@@ -61,6 +61,24 @@ try
             };
         });
 
+    // Development-only CORS: the Angular dev server (localhost:4200) and the API
+    // (localhost:5017) are different origins, so the browser needs an explicit
+    // allow-list. The allowed origins come from configuration to avoid hardcoding.
+    const string devCorsPolicy = "AngularDev";
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(devCorsPolicy, policy =>
+        {
+            var origins = builder.Configuration
+                .GetSection("Cors:AllowedOrigins")
+                .Get<string[]>() ?? ["http://localhost:4200"];
+
+            policy.WithOrigins(origins)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
+
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
@@ -93,6 +111,12 @@ try
     // correlates every event with the request TraceIdentifier.
     app.UseMiddleware<GlobalExceptionMiddleware>();
 
+    // CORS must run before anything that can short-circuit the request.
+    if (isDevelopment)
+    {
+        app.UseCors(devCorsPolicy);
+    }
+
     // Swagger is available at /swagger (UI) and /swagger/v1/swagger.json (JSON).
     app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -100,7 +124,13 @@ try
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "TaskPage API v1");
     });
 
-    app.UseHttpsRedirection();
+    // Outside development the API runs behind HTTPS. In development the local port
+    // is plain HTTP, so redirecting would send the client to a port that is not bound.
+    if (!isDevelopment)
+    {
+        app.UseHttpsRedirection();
+    }
+
     app.MapControllers();
 
     app.Run();
