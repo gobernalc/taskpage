@@ -1,0 +1,42 @@
+/* Styles for the pagination shared component. */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.pagination__button {
+  padding: var(--space-xs) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-accent-500);
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.pagination__button:hover:not(:disabled) {
+  background-color: var(--color-surface-muted);
+  transform: translateY(-1px);
+}
+
+.pagination__button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pagination__summary {
+  font-weight: 600;
+}
+
+.pagination__items {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
