@@ -47,5 +47,19 @@
   "tasks.placeholder.additionalData": "{\"priority\":\"High\"}",
   "tasks.selectUser": "Select a user",
   "tasks.create": "Create task",
-  "tasks.save": "Save changes"
+  "tasks.save": "Save changes",
+  "common.invalidEmail": "Enter a valid email address",
+  "filters.searchUsers": "Search by name or email...",
+  "users.new": "New user",
+  "users.edit": "Edit",
+  "users.delete": "Delete",
+  "users.deleteConfirm": "Delete the user \"{{name}}\"?",
+  "users.createTitle": "Create user",
+  "users.editTitle": "Edit user",
+  "users.field.name": "Name",
+  "users.field.email": "Email",
+  "users.placeholder.name": "Full name",
+  "users.placeholder.email": "name@example.com",
+  "users.create": "Create user",
+  "users.save": "Save changes"
 }

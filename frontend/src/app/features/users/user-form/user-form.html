@@ -1,0 +1,66 @@
+<!-- Reactive form to create or edit a user. -->
+<section class="user-form">
+  <app-card [title]="(isEdit() ? 'users.editTitle' : 'users.createTitle') | translate">
+    @if (loading()) {
+      <p class="user-form__state">{{ 'common.loading' | translate }}</p>
+    } @else {
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="field">
+          <label class="field__label" for="user-name">
+            {{ 'users.field.name' | translate }}
+          </label>
+          <input
+            id="user-name"
+            type="text"
+            class="field__control"
+            [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid"
+            formControlName="name"
+            [placeholder]="'users.placeholder.name' | translate"
+          />
+          @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+            <p class="field__error">{{ 'common.required' | translate }}</p>
+          }
+          @if (form.controls.name.touched && form.controls.name.hasError('maxlength')) {
+            <p class="field__error">{{ 'common.maxLength' | translate: { max: '100' } }}</p>
+          }
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="user-email">
+            {{ 'users.field.email' | translate }}
+          </label>
+          <input
+            id="user-email"
+            type="email"
+            class="field__control"
+            [class.is-invalid]="form.controls.email.touched && form.controls.email.invalid"
+            formControlName="email"
+            [placeholder]="'users.placeholder.email' | translate"
+          />
+          @if (form.controls.email.touched && form.controls.email.hasError('required')) {
+            <p class="field__error">{{ 'common.required' | translate }}</p>
+          }
+          @if (form.controls.email.touched && form.controls.email.hasError('email')) {
+            <p class="field__error">{{ 'common.invalidEmail' | translate }}</p>
+          }
+          @if (form.controls.email.touched && form.controls.email.hasError('maxlength')) {
+            <p class="field__error">{{ 'common.maxLength' | translate: { max: '200' } }}</p>
+          }
+        </div>
+
+        @if (error()) {
+          <p class="user-form__error" role="alert">{{ error() }}</p>
+        }
+
+        <div class="form__actions">
+          <a class="btn" data-variant="ghost" routerLink="/users">
+            {{ 'common.cancel' | translate }}
+          </a>
+          <app-button type="submit" [disabled]="submitting()">
+            {{ (isEdit() ? 'users.save' : 'users.create') | translate }}
+          </app-button>
+        </div>
+      </form>
+    }
+  </app-card>
+</section>

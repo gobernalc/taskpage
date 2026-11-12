@@ -1,0 +1,62 @@
+<!-- User listing with search, pagination and deletion. -->
+<section class="user-list">
+  <header class="user-list__header">
+    <h1 class="user-list__title">{{ 'users.title' | translate }}</h1>
+    <a class="btn" data-variant="primary" routerLink="/users/new">
+      {{ 'users.new' | translate }}
+    </a>
+  </header>
+
+  <div class="field">
+    <label class="field__label" for="user-search">
+      {{ 'filters.searchUsers' | translate }}
+    </label>
+    <input
+      id="user-search"
+      type="search"
+      class="field__control"
+      (input)="onSearchChange($event)"
+      [attr.aria-label]="'filters.searchUsers' | translate"
+    />
+  </div>
+
+  @if (error()) {
+    <p class="user-list__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="user-list__state">{{ 'common.loading' | translate }}</p>
+  } @else if (users().length === 0) {
+    <p class="user-list__state">{{ 'users.empty' | translate }}</p>
+  } @else {
+    <ul class="user-list__items">
+      @for (user of users(); track user.id) {
+        <li class="user-list__item">
+          <div class="user-list__item-main">
+            <span class="user-list__item-name">{{ user.name }}</span>
+            <span class="user-list__item-email">{{ user.email }}</span>
+          </div>
+          <div class="user-list__item-actions">
+            <a class="btn" data-variant="secondary" [routerLink]="['/users', user.id, 'edit']">
+              {{ 'users.edit' | translate }}
+            </a>
+            <app-button
+              variant="danger"
+              [disabled]="deleting() === user.id"
+              (click)="deleteUser(user)"
+            >
+              {{ 'users.delete' | translate }}
+            </app-button>
+          </div>
+        </li>
+      }
+    </ul>
+
+    <app-pagination
+      [page]="page()"
+      [totalPages]="totalPages()"
+      [totalItems]="totalItems()"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</section>

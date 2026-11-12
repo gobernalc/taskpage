@@ -1,0 +1,22 @@
+/* Styles for the user form. */
+
+.user-form {
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.user-form__state {
+  margin: 0;
+  padding: var(--space-xl) 0;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.user-form__error {
+  margin: 0;
+  padding: var(--space-md);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  background-color: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
+}
