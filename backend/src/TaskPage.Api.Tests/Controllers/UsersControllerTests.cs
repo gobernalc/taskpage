@@ -42,7 +42,10 @@ public class UsersControllerTests : TestBase
             }, CancellationToken.None);
 
             var created = Assert.IsType<CreatedAtActionResult>(result.Result);
-            Assert.Equal(nameof(UsersController.GetByIdAsync), created.ActionName);
+            // MVC strips the "Async" suffix from action names, so the Location URL must
+            // target the "GetById" action generated from GetByIdAsync.
+            var expectedActionName = nameof(UsersController.GetByIdAsync)[..^"Async".Length];
+            Assert.Equal(expectedActionName, created.ActionName);
             Assert.Equal(1, created.RouteValues?["id"]);
             var response = Assert.IsType<UserResponse>(created.Value);
             Assert.Equal("ana.perez@example.com", response.Email);

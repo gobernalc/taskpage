@@ -59,7 +59,10 @@ public class TasksControllerTests : TestBase
             }, CancellationToken.None);
 
             var created = Assert.IsType<CreatedAtActionResult>(result.Result);
-            Assert.Equal(nameof(TasksController.GetByIdAsync), created.ActionName);
+            // MVC strips the "Async" suffix from action names, so the Location URL must
+            // target the "GetById" action generated from GetByIdAsync.
+            var expectedActionName = nameof(TasksController.GetByIdAsync)[..^"Async".Length];
+            Assert.Equal(expectedActionName, created.ActionName);
             Assert.Equal(1, created.RouteValues?["id"]);
             var response = Assert.IsType<TaskResponse>(created.Value);
             Assert.Equal(TaskState.Pending, response.Status);
