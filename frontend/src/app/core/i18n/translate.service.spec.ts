@@ -82,4 +82,37 @@ describe('TranslateService', () => {
     service.translations.set({ 'common.maxLength': 'Must not exceed {{max}} characters' });
     expect(service.translate('common.maxLength', {})).toBe('Must not exceed {{max}} characters');
   });
+
+  /** Verifies that set activates, persists and loads the requested language. */
+  it('should activate the selected language and persist it', async () => {
+    const service = createService();
+    const promise = service.set('en');
+    httpMock.expectOne('assets/i18n/en.json').flush({ 'nav.users': 'Users' });
+    await promise;
+    expect(service.language()).toBe('en');
+    expect(localStorage.getItem('taskpage.language')).toBe('en');
+    expect(document.documentElement.lang).toBe('en');
+    expect(service.translations()['nav.users']).toBe('Users');
+  });
+
+  /** Verifies that accented characters are returned unchanged. */
+  it('should preserve accented characters in translations', () => {
+    const service = createService();
+    service.translations.set({ 'tasks.title': 'Diseñar modelo de datos' });
+    expect(service.translate('tasks.title')).toBe('Diseñar modelo de datos');
+  });
+
+  /** Verifies that a failed dictionary request keeps the previous translations. */
+  it('should keep the previous dictionary when loading fails', async () => {
+    const service = TestBed.inject(TranslateService);
+    httpMock.expectOne('assets/i18n/es.json').flush({ 'app.title': 'TaskPage' });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const promise = service.set('en');
+    httpMock.expectOne('assets/i18n/en.json').error(new ProgressEvent('error'));
+    await promise;
+
+    expect(service.language()).toBe('en');
+    expect(service.translations()['app.title']).toBe('TaskPage');
+  });
 });
