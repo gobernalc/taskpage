@@ -20,9 +20,21 @@ import { TasksService } from '../../../core/services/tasks.service';
       (change)="onChange($event)"
       [attr.aria-label]="'tasks.changeStatus' | translate"
     >
-      <option [value]="TaskState.Pending">{{ 'status.pending' | translate }}</option>
-      <option [value]="TaskState.InProgress">{{ 'status.inProgress' | translate }}</option>
-      <option [value]="TaskState.Done">{{ 'status.done' | translate }}</option>
+      <option
+        [value]="TaskState.Pending"
+        [selected]="task().status === TaskState.Pending"
+      >
+        {{ 'status.pending' | translate }}
+      </option>
+      <option
+        [value]="TaskState.InProgress"
+        [selected]="task().status === TaskState.InProgress"
+      >
+        {{ 'status.inProgress' | translate }}
+      </option>
+      <option [value]="TaskState.Done" [selected]="task().status === TaskState.Done">
+        {{ 'status.done' | translate }}
+      </option>
     </select>
     @if (error()) {
       <p class="status-select__error">{{ error() }}</p>
@@ -62,10 +74,10 @@ export class TaskStatus {
     this.error.set('');
     this.tasks.changeStatus(this.task().id, next).subscribe({
       next: (updated) => this.changed.emit(updated),
-      error: (err) =>
-        this.error.set(
-          readErrorMessage(err) ?? this.translate.translate('common.apiError'),
-        ),
+      error: (err) => {
+        select.value = String(current);
+        this.error.set(readErrorMessage(err) ?? this.translate.translate('common.apiError'));
+      },
     });
   }
 }
