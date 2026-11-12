@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Subject, debounceTime, firstValueFrom } from 'rxjs';
 import { readErrorMessage } from '../../../core/http-error';
@@ -9,6 +16,7 @@ import { Task } from '../../../core/models/task.model';
 import { TasksService } from '../../../core/services/tasks.service';
 import { Badge, BadgeTone } from '../../../shared/components/badge/badge';
 import { Button } from '../../../shared/components/button/button';
+import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { TaskStatus } from '../task-status/task-status';
 
@@ -25,7 +33,7 @@ interface StatusOption {
  */
 @Component({
   selector: 'app-task-list',
-  imports: [RouterLink, TranslatePipe, Badge, Button, Pagination, TaskStatus],
+  imports: [RouterLink, TranslatePipe, Badge, Button, ConfirmDialog, Pagination, TaskStatus],
   templateUrl: './task-list.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './task-list.scss',
@@ -54,6 +62,20 @@ export class TaskList implements OnInit {
   protected readonly search = signal('');
   /** Identifier of the task being deleted, used to disable its button. */
   protected readonly deleting = signal<number | null>(null);
+  /** Task waiting for confirmation in the delete dialog. */
+  protected readonly pendingDelete = signal<Task | null>(null);
+
+  /** Dialog heading for the delete confirmation. */
+  protected readonly deleteTitle = computed(() => this.translate.translate('tasks.deleteTitle'));
+  /** Dialog confirm label, matching the delete button of the list. */
+  protected readonly deleteLabel = computed(() => this.translate.translate('tasks.delete'));
+  /** Dialog cancel label. */
+  protected readonly cancelLabel = computed(() => this.translate.translate('common.cancel'));
+  /** Dialog body interpolated with the title of the pending task. */
+  protected readonly deleteMessage = computed(() => {
+    const task = this.pendingDelete();
+    return task ? this.translate.translate('tasks.deleteConfirm', { title: task.title }) : '';
+  });
 
   /** Options of the status filter selector. */
   protected readonly statusOptions: StatusOption[] = [
@@ -118,10 +140,20 @@ export class TaskList implements OnInit {
     this.tasks.update((list) => list.map((task) => (task.id === updated.id ? updated : task)));
   }
 
-  /** Deletes a task after user confirmation and reloads the list. */
-  protected deleteTask(task: Task): void {
-    const message = this.translate.translate('tasks.deleteConfirm', { title: task.title });
-    if (!window.confirm(message)) {
+  /** Opens the delete confirmation dialog for the selected task. */
+  protected requestDelete(task: Task): void {
+    this.pendingDelete.set(task);
+  }
+
+  /** Closes the delete confirmation dialog without deleting anything. */
+  protected cancelDelete(): void {
+    this.pendingDelete.set(null);
+  }
+
+  /** Deletes the task confirmed in the dialog and reloads the list. */
+  protected confirmDelete(): void {
+    const task = this.pendingDelete();
+    if (!task) {
       return;
     }
     this.deleting.set(task.id);
@@ -129,10 +161,12 @@ export class TaskList implements OnInit {
     this.tasksService.delete(task.id).subscribe({
       next: () => {
         this.deleting.set(null);
+        this.pendingDelete.set(null);
         void this.load();
       },
       error: (err) => {
         this.deleting.set(null);
+        this.pendingDelete.set(null);
         this.error.set(readErrorMessage(err) ?? this.translate.translate('common.apiError'));
       },
     });

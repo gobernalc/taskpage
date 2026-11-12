@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Subject, debounceTime, firstValueFrom } from 'rxjs';
 import { readErrorMessage } from '../../../core/http-error';
@@ -7,6 +14,7 @@ import { TranslateService } from '../../../core/i18n/translate.service';
 import { User } from '../../../core/models/user.model';
 import { UsersService } from '../../../core/services/users.service';
 import { Button } from '../../../shared/components/button/button';
+import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 
 /**
@@ -14,7 +22,7 @@ import { Pagination } from '../../../shared/components/pagination/pagination';
  */
 @Component({
   selector: 'app-user-list',
-  imports: [RouterLink, TranslatePipe, Button, Pagination],
+  imports: [RouterLink, TranslatePipe, Button, ConfirmDialog, Pagination],
   templateUrl: './user-list.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './user-list.scss',
@@ -41,6 +49,20 @@ export class UserList implements OnInit {
   protected readonly search = signal('');
   /** Identifier of the user being deleted, used to disable its button. */
   protected readonly deleting = signal<number | null>(null);
+  /** User waiting for confirmation in the delete dialog. */
+  protected readonly pendingDelete = signal<User | null>(null);
+
+  /** Dialog heading for the delete confirmation. */
+  protected readonly deleteTitle = computed(() => this.translate.translate('users.deleteTitle'));
+  /** Dialog confirm label, matching the delete button of the list. */
+  protected readonly deleteLabel = computed(() => this.translate.translate('users.delete'));
+  /** Dialog cancel label. */
+  protected readonly cancelLabel = computed(() => this.translate.translate('common.cancel'));
+  /** Dialog body interpolated with the name of the pending user. */
+  protected readonly deleteMessage = computed(() => {
+    const user = this.pendingDelete();
+    return user ? this.translate.translate('users.deleteConfirm', { name: user.name }) : '';
+  });
 
   private readonly searchSubject = new Subject<string>();
 
@@ -84,10 +106,20 @@ export class UserList implements OnInit {
     void this.load();
   }
 
-  /** Deletes a user after confirmation and reloads the list. */
-  protected deleteUser(user: User): void {
-    const message = this.translate.translate('users.deleteConfirm', { name: user.name });
-    if (!window.confirm(message)) {
+  /** Opens the delete confirmation dialog for the selected user. */
+  protected requestDelete(user: User): void {
+    this.pendingDelete.set(user);
+  }
+
+  /** Closes the delete confirmation dialog without deleting anything. */
+  protected cancelDelete(): void {
+    this.pendingDelete.set(null);
+  }
+
+  /** Deletes the user confirmed in the dialog and reloads the list. */
+  protected confirmDelete(): void {
+    const user = this.pendingDelete();
+    if (!user) {
       return;
     }
     this.deleting.set(user.id);
@@ -95,10 +127,12 @@ export class UserList implements OnInit {
     this.usersService.delete(user.id).subscribe({
       next: () => {
         this.deleting.set(null);
+        this.pendingDelete.set(null);
         void this.load();
       },
       error: (err) => {
         this.deleting.set(null);
+        this.pendingDelete.set(null);
         this.error.set(readErrorMessage(err) ?? this.translate.translate('common.apiError'));
       },
     });

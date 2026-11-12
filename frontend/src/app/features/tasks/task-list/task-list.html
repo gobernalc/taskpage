@@ -69,7 +69,7 @@
             <app-button
               variant="danger"
               [disabled]="deleting() === task.id"
-              (click)="deleteTask(task)"
+              (click)="requestDelete(task)"
             >
               {{ 'tasks.delete' | translate }}
             </app-button>
@@ -86,3 +86,14 @@
     />
   }
 </section>
+
+<app-confirm-dialog
+  [open]="pendingDelete() !== null"
+  [title]="deleteTitle()"
+  [message]="deleteMessage()"
+  [confirmLabel]="deleteLabel()"
+  [cancelLabel]="cancelLabel()"
+  [busy]="deleting() !== null"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>

@@ -1,0 +1,57 @@
+<!-- Confirmation modal rendered only while the parent keeps it open. -->
+@if (open()) {
+  <div class="confirm-overlay" (click)="onBackdrop($event)">
+    <div
+      #panel
+      class="confirm-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirm-dialog-title"
+      aria-describedby="confirm-dialog-message"
+      [attr.data-tone]="tone()"
+      (keydown.tab)="onTab($event)"
+    >
+      <span class="confirm-dialog__accent" aria-hidden="true"></span>
+
+      <span class="confirm-dialog__icon" aria-hidden="true">
+        <svg class="confirm-dialog__icon-svg" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M12 4 3 20h18L12 4Z"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linejoin="round"
+          />
+          <path d="M12 9.5v4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          <circle cx="12" cy="17" r="1" fill="currentColor" />
+        </svg>
+      </span>
+
+      <h2 class="confirm-dialog__title" id="confirm-dialog-title">{{ title() }}</h2>
+      <p class="confirm-dialog__message" id="confirm-dialog-message">{{ message() }}</p>
+
+      <div class="confirm-dialog__actions">
+        <button
+          #cancelButton
+          type="button"
+          class="btn confirm-dialog__button"
+          data-variant="secondary"
+          data-action="cancel"
+          [disabled]="busy()"
+          (click)="onCancel()"
+        >
+          {{ cancelLabel() }}
+        </button>
+        <button
+          type="button"
+          class="btn confirm-dialog__button"
+          data-action="confirm"
+          [attr.data-variant]="tone() === 'danger' ? 'danger' : 'primary'"
+          [disabled]="busy()"
+          (click)="onConfirm()"
+        >
+          {{ confirmLabel() }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
