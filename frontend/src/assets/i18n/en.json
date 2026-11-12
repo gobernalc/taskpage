@@ -32,5 +32,20 @@
   "tasks.changeStatus": "Change status",
   "tasks.deleteConfirm": "Delete the task \"{{title}}\"?",
   "tasks.statusTransitionError": "A task cannot go from Pending to Done directly.",
-  "tasks.list.assignedTo": "Assigned to"
+  "tasks.list.assignedTo": "Assigned to",
+  "common.required": "Required field",
+  "common.maxLength": "Must not exceed {{max}} characters",
+  "common.invalidJson": "The additional data must be valid JSON.",
+  "common.cancel": "Cancel",
+  "tasks.createTitle": "Create task",
+  "tasks.editTitle": "Edit task",
+  "tasks.field.title": "Title",
+  "tasks.field.assignedUser": "Assigned user",
+  "tasks.field.status": "Status",
+  "tasks.field.additionalData": "Additional data (JSON)",
+  "tasks.placeholder.title": "Write the task title",
+  "tasks.placeholder.additionalData": "{\"priority\":\"High\"}",
+  "tasks.selectUser": "Select a user",
+  "tasks.create": "Create task",
+  "tasks.save": "Save changes"
 }
