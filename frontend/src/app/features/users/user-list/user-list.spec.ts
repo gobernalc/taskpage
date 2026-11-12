@@ -93,30 +93,57 @@ describe('UserList', () => {
     }
   });
 
+  /** Verifies that the delete action opens the modal instead of deleting directly. */
+  it('should open the confirmation dialog when the user requests a deletion', async () => {
+    await createComponent();
+
+    const deleteButton = fixture.nativeElement.querySelector('button[data-variant="danger"]') as HTMLButtonElement;
+    deleteButton.click();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('[role="alertdialog"]') as HTMLElement;
+    expect(dialog).toBeTruthy();
+    expect(dialog.textContent).toContain('users.deleteConfirm');
+    expect(usersService.delete).not.toHaveBeenCalled();
+  });
+
   /** Verifies that a confirmed deletion removes the user and reloads the list. */
   it('should delete a user after confirmation and reload the list', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     await createComponent();
     usersService.list.mockClear();
 
     const deleteButton = fixture.nativeElement.querySelector('button[data-variant="danger"]') as HTMLButtonElement;
     deleteButton.click();
+    fixture.detectChanges();
+
+    const confirmButton = fixture.nativeElement.querySelector(
+      '[data-action="confirm"]',
+    ) as HTMLButtonElement;
+    confirmButton.click();
     await new Promise((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(usersService.delete).toHaveBeenCalledWith(users[0].id);
     expect(usersService.list).toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeNull();
   });
 
   /** Verifies that cancelling the confirmation keeps the user untouched. */
   it('should not delete a user when the user cancels the confirmation', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
     await createComponent();
 
     const deleteButton = fixture.nativeElement.querySelector('button[data-variant="danger"]') as HTMLButtonElement;
     deleteButton.click();
+    fixture.detectChanges();
+
+    const cancelButton = fixture.nativeElement.querySelector(
+      '[data-action="cancel"]',
+    ) as HTMLButtonElement;
+    cancelButton.click();
+    fixture.detectChanges();
 
     expect(usersService.delete).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeNull();
   });
 
   /** Verifies that a load failure surfaces a readable error message. */

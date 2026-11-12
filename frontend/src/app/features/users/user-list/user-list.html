@@ -43,7 +43,7 @@
             <app-button
               variant="danger"
               [disabled]="deleting() === user.id"
-              (click)="deleteUser(user)"
+              (click)="requestDelete(user)"
             >
               {{ 'users.delete' | translate }}
             </app-button>
@@ -60,3 +60,14 @@
     />
   }
 </section>
+
+<app-confirm-dialog
+  [open]="pendingDelete() !== null"
+  [title]="deleteTitle()"
+  [message]="deleteMessage()"
+  [confirmLabel]="deleteLabel()"
+  [cancelLabel]="cancelLabel()"
+  [busy]="deleting() !== null"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>
