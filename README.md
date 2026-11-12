@@ -287,6 +287,38 @@ Cross-cutting behavior:
   correlating every event with the request `TraceIdentifier` and masking
   sensitive data.
 
+### 6.5 Visual design
+
+The frontend applies a custom navy/deep blue palette inspired by the propiedapp
+project, avoiding a generic look:
+
+- Design tokens live in [`frontend/src/styles.scss`](frontend/src/styles.scss:1)
+  as CSS variables: colors, 2-stop gradients, spacing, radii, shadows, motion and
+  typography. Components consume the variables, so no color, spacing, radius or
+  gradient is hardcoded.
+- A switchable light/dark theme overrides the tokens through the
+  `[data-theme="dark"]` selector, honors `prefers-color-scheme` by default and
+  persists the user choice in `localStorage` (non-sensitive key).
+- The application shell ([`app.html`](frontend/src/app/app.html:1),
+  [`app.scss`](frontend/src/app/app.scss:1)) provides a sticky header with the
+  brand, primary navigation, theme and language switchers, a main outlet and a
+  footer, with subtle transitions and accessible focus states.
+
+### 6.6 Internationalization
+
+Every visible UI text is centralized in `frontend/src/assets/i18n/es.json`
+(default language, Spanish) and `frontend/src/assets/i18n/en.json`, and referenced
+by key from the templates — hardcoding texts is forbidden:
+
+- A custom [`TranslateService`](frontend/src/app/core/i18n/translate.service.ts:1)
+  loads the active dictionary, exposes it as a signal and persists the language in
+  `localStorage` (non-sensitive key).
+- A standalone [`TranslatePipe`](frontend/src/app/core/i18n/translate.pipe.ts:1)
+  renders keys in templates with simple `{{name}}` interpolation.
+- States (`Pending`, `InProgress`, `Done`), buttons, titles, placeholders and
+  accessibility texts live in the language files; the API keeps returning English
+  messages and the frontend translates only its own interface.
+
 ## 7. Branching and delivery
 
 The repository follows **trunk-based development**:
@@ -325,6 +357,7 @@ git switch main && git pull --ff-only
   the custom reporter `vitest.emoji-reporter.ts`, which prints ✅/❌ per spec).
 - Project status: the environment and project structure are set up, and
   **Phase 1 (database schema)**, **Phase 2 (domain and application layer)**,
-  **Phase 3 (SQL Server persistence)** and **Phase 4 (REST API with Swagger)** are
-  implemented. Backend and frontend layers will keep growing phase by phase
-  according to [`plans/design.md`](plans/design.md:1).
+  **Phase 3 (SQL Server persistence)**, **Phase 4 (REST API with Swagger)**,
+  **Phase 5 (backend unit tests)** and **Phase 6 (frontend base with custom
+  design, i18n and services)** are implemented. Backend and frontend layers will
+  keep growing phase by phase according to [`plans/design.md`](plans/design.md:1).
