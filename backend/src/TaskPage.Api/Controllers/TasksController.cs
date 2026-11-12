@@ -15,6 +15,12 @@ namespace TaskPage.Api.Controllers;
 [Produces("application/json")]
 public class TasksController : ControllerBase
 {
+    /// <summary>
+    /// Action name MVC generates for <see cref="GetByIdAsync"/>: the framework strips
+    /// the "Async" suffix, so the Location URL must target this name.
+    /// </summary>
+    private const string GetByIdActionName = "GetById";
+
     private readonly TaskService _tasks;
     private readonly IValidator<CreateTaskRequest> _createValidator;
     private readonly IValidator<UpdateTaskRequest> _updateValidator;
@@ -58,7 +64,7 @@ public class TasksController : ControllerBase
         var response = await _tasks.CreateAsync(request, cancellationToken);
 
         _logger.LogInformation("Task created with id {TaskId}", response.Id);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = response.Id }, response);
+        return CreatedAtAction(GetByIdActionName, new { id = response.Id }, response);
     }
 
     /// <summary>Lists tasks with filters, search, sorting and pagination.</summary>

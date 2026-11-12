@@ -14,6 +14,12 @@ namespace TaskPage.Api.Controllers;
 [Produces("application/json")]
 public class UsersController : ControllerBase
 {
+    /// <summary>
+    /// Action name MVC generates for <see cref="GetByIdAsync"/>: the framework strips
+    /// the "Async" suffix, so the Location URL must target this name.
+    /// </summary>
+    private const string GetByIdActionName = "GetById";
+
     private readonly UserService _users;
     private readonly IValidator<CreateUserRequest> _createValidator;
     private readonly IValidator<UpdateUserRequest> _updateValidator;
@@ -53,7 +59,7 @@ public class UsersController : ControllerBase
         var response = await _users.CreateAsync(request, cancellationToken);
 
         _logger.LogInformation("User created with id {UserId}", response.Id);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = response.Id }, response);
+        return CreatedAtAction(GetByIdActionName, new { id = response.Id }, response);
     }
 
     /// <summary>Lists users with search, sorting and pagination.</summary>
