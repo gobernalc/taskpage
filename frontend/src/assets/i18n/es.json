@@ -15,5 +15,10 @@
   "users.empty": "No hay usuarios disponibles.",
   "status.pending": "Pendiente",
   "status.inProgress": "En progreso",
-  "status.done": "Completada"
+  "status.done": "Completada",
+  "pagination.label": "Paginación",
+  "pagination.previous": "Anterior",
+  "pagination.next": "Siguiente",
+  "pagination.summary": "Página {{page}} de {{totalPages}}",
+  "pagination.items": "{{totalItems}} elementos"
 }

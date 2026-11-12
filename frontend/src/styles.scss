@@ -102,3 +102,58 @@ a:hover {
 button {
   font-family: inherit;
 }
+
+/* Form fields shared by lists and forms, styled with the design tokens. */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.field__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.field__control {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.field__control:focus {
+  outline: none;
+  border-color: var(--color-accent-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-500) 25%, transparent);
+}
+
+.field__control.is-invalid {
+  border-color: var(--color-danger);
+}
+
+.field__error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-danger);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.form__actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}

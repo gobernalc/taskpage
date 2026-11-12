@@ -1,0 +1,18 @@
+/* Styles for the card shared component. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.card__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
