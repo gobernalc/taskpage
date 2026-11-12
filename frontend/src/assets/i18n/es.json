@@ -1,0 +1,18 @@
+{
+  "app.title": "TaskPage",
+  "app.subtitle": "Gestión interna de tareas",
+  "nav.tasks": "Tareas",
+  "nav.users": "Usuarios",
+  "theme.toggle": "Cambiar tema",
+  "theme.light": "Claro",
+  "theme.dark": "Oscuro",
+  "language.toggle": "Cambiar idioma",
+  "footer.text": "TaskPage — gestión interna de tareas",
+  "tasks.title": "Tareas",
+  "tasks.empty": "No hay tareas disponibles.",
+  "users.title": "Usuarios",
+  "users.empty": "No hay usuarios disponibles.",
+  "status.pending": "Pendiente",
+  "status.inProgress": "En progreso",
+  "status.done": "Completada"
+}
