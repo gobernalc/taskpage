@@ -24,7 +24,6 @@ export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
     </button>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './button.scss',
 })
 export class Button {
   /** Native button type (submit for forms). */

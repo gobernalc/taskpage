@@ -20,5 +20,17 @@
   "pagination.previous": "Anterior",
   "pagination.next": "Siguiente",
   "pagination.summary": "Página {{page}} de {{totalPages}}",
-  "pagination.items": "{{totalItems}} elementos"
+  "pagination.items": "{{totalItems}} elementos",
+  "common.loading": "Cargando...",
+  "common.apiError": "No se pudo completar la operación.",
+  "filters.all": "Todos",
+  "filters.status": "Estado",
+  "filters.searchTasks": "Buscar por título...",
+  "tasks.new": "Nueva tarea",
+  "tasks.edit": "Editar",
+  "tasks.delete": "Eliminar",
+  "tasks.changeStatus": "Cambiar estado",
+  "tasks.deleteConfirm": "¿Eliminar la tarea «{{title}}»?",
+  "tasks.statusTransitionError": "Una tarea no puede pasar de Pendiente a Completada directamente.",
+  "tasks.list.assignedTo": "Asignada a"
 }

@@ -20,5 +20,17 @@
   "pagination.previous": "Previous",
   "pagination.next": "Next",
   "pagination.summary": "Page {{page}} of {{totalPages}}",
-  "pagination.items": "{{totalItems}} items"
+  "pagination.items": "{{totalItems}} items",
+  "common.loading": "Loading...",
+  "common.apiError": "The operation could not be completed.",
+  "filters.all": "All",
+  "filters.status": "Status",
+  "filters.searchTasks": "Search by title...",
+  "tasks.new": "New task",
+  "tasks.edit": "Edit",
+  "tasks.delete": "Delete",
+  "tasks.changeStatus": "Change status",
+  "tasks.deleteConfirm": "Delete the task \"{{title}}\"?",
+  "tasks.statusTransitionError": "A task cannot go from Pending to Done directly.",
+  "tasks.list.assignedTo": "Assigned to"
 }
