@@ -203,6 +203,24 @@ ng test --watch=false
 Cada spec imprime en consola **✅ si pasa** y **❌ si falla** mediante un reporter
 personalizado (`vitest.emoji-reporter.ts`).
 
+La suite del frontend cubre:
+
+- `UsersService`/`TasksService`: peticiones CRUD, parámetros de consulta, mapeo de
+  respuestas paginadas y respuestas de error de red.
+- `TranslateService`/`TranslatePipe`: carga de `es.json`/`en.json`, cambio y
+  persistencia del idioma, claves faltantes e interpolación.
+- `TaskList`: renderizado, filtro de estado, búsqueda de título con debounce,
+  paginación, estado vacío, eliminación con confirmación y errores de carga.
+- `TaskCreate`/`TaskEdit`: carga de usuarios, validación reactiva, payloads de
+  envío, validación de JSON y errores de la API.
+- `TaskStatus`: la transición prohibida `Pending -> Done` y las transiciones
+  permitidas con su manejo de errores de la API.
+- `UserList`/`UserForm`: renderizado, búsqueda, eliminación, validación reactiva
+  y flujos de creación y edición.
+- `Pagination` y `Badge`: navegación en los límites y enganches de tono de estado.
+- Tema y accesibilidad: persistencia del cambio de tema, etiquetas accesibles de
+  navegación y controles, y enganches de contraste de estados.
+
 ---
 
 ## 6. Decisiones técnicas
