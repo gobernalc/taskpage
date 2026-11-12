@@ -319,6 +319,34 @@ by key from the templates — hardcoding texts is forbidden:
   accessibility texts live in the language files; the API keeps returning English
   messages and the frontend translates only its own interface.
 
+### 6.7 Interface features
+
+The functional frontend manages tasks and users end to end:
+
+- **Task list** ([`task-list.ts`](frontend/src/app/features/tasks/task-list/task-list.ts:1))
+  lists tasks with a status filter, debounced title search and pagination, shows
+  the status badge and the assigned user, and allows deleting a task and changing
+  its status inline (rejecting the forbidden `Pending -> Done` transition).
+- **Task creation and edition** ([`task-create.ts`](frontend/src/app/features/tasks/task-create/task-create.ts:1),
+  [`task-edit.ts`](frontend/src/app/features/tasks/task-edit/task-edit.ts:1)) are
+  reactive forms with title, an assigned-user selector and optional JSON additional
+  data, validated on the client before submission.
+- **User list** ([`user-list.ts`](frontend/src/app/features/users/user-list/user-list.ts:1))
+  lists users with search and pagination and allows deleting them.
+- **User form** ([`user-form.ts`](frontend/src/app/features/users/user-form/user-form.ts:1))
+  creates and edits users with name and email validation.
+- **Shared components** ([`badge`](frontend/src/app/shared/components/badge/badge.ts:1),
+  [`button`](frontend/src/app/shared/components/button/button.ts:1),
+  [`card`](frontend/src/app/shared/components/card/card.ts:1),
+  [`select`](frontend/src/app/shared/components/select/select.ts:1) and
+  [`pagination`](frontend/src/app/shared/components/pagination/pagination.ts:1))
+  are reused by every feature instead of duplicating markup.
+- **Error handling** reads the `ProblemDetails` payload returned by the API and
+  shows a readable message without exposing internal details.
+
+Routes: `/tasks` (list), `/tasks/new` (create), `/tasks/:id/edit` (edit),
+`/users` (list), `/users/new` (create) and `/users/:id/edit` (edit).
+
 ## 7. Branching and delivery
 
 The repository follows **trunk-based development**:
@@ -358,6 +386,7 @@ git switch main && git pull --ff-only
 - Project status: the environment and project structure are set up, and
   **Phase 1 (database schema)**, **Phase 2 (domain and application layer)**,
   **Phase 3 (SQL Server persistence)**, **Phase 4 (REST API with Swagger)**,
-  **Phase 5 (backend unit tests)** and **Phase 6 (frontend base with custom
-  design, i18n and services)** are implemented. Backend and frontend layers will
-  keep growing phase by phase according to [`plans/design.md`](plans/design.md:1).
+  **Phase 5 (backend unit tests)**, **Phase 6 (frontend base with custom
+  design, i18n and services)** and **Phase 7 (task and user management in the
+  frontend)** are implemented. Backend and frontend layers will keep growing
+  phase by phase according to [`plans/design.md`](plans/design.md:1).
