@@ -23,5 +23,15 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/users/user-list/user-list').then((module) => module.UserList),
   },
+  {
+    path: 'users/new',
+    loadComponent: () =>
+      import('./features/users/user-form/user-form').then((module) => module.UserForm),
+  },
+  {
+    path: 'users/:id/edit',
+    loadComponent: () =>
+      import('./features/users/user-form/user-form').then((module) => module.UserForm),
+  },
   { path: '**', redirectTo: 'tasks' },
 ];

@@ -47,5 +47,19 @@
   "tasks.placeholder.additionalData": "{\"priority\":\"High\"}",
   "tasks.selectUser": "Selecciona un usuario",
   "tasks.create": "Crear tarea",
-  "tasks.save": "Guardar cambios"
+  "tasks.save": "Guardar cambios",
+  "common.invalidEmail": "Ingresa un correo válido",
+  "filters.searchUsers": "Buscar por nombre o correo...",
+  "users.new": "Nuevo usuario",
+  "users.edit": "Editar",
+  "users.delete": "Eliminar",
+  "users.deleteConfirm": "¿Eliminar el usuario «{{name}}»?",
+  "users.createTitle": "Crear usuario",
+  "users.editTitle": "Editar usuario",
+  "users.field.name": "Nombre",
+  "users.field.email": "Correo electrónico",
+  "users.placeholder.name": "Nombre completo",
+  "users.placeholder.email": "nombre@ejemplo.com",
+  "users.create": "Crear usuario",
+  "users.save": "Guardar cambios"
 }
