@@ -1,0 +1,18 @@
+{
+  "app.title": "TaskPage",
+  "app.subtitle": "Internal task management",
+  "nav.tasks": "Tasks",
+  "nav.users": "Users",
+  "theme.toggle": "Toggle theme",
+  "theme.light": "Light",
+  "theme.dark": "Dark",
+  "language.toggle": "Switch language",
+  "footer.text": "TaskPage — internal task management",
+  "tasks.title": "Tasks",
+  "tasks.empty": "No tasks available.",
+  "users.title": "Users",
+  "users.empty": "No users available.",
+  "status.pending": "Pending",
+  "status.inProgress": "In progress",
+  "status.done": "Done"
+}
