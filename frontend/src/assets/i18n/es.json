@@ -32,5 +32,20 @@
   "tasks.changeStatus": "Cambiar estado",
   "tasks.deleteConfirm": "¿Eliminar la tarea «{{title}}»?",
   "tasks.statusTransitionError": "Una tarea no puede pasar de Pendiente a Completada directamente.",
-  "tasks.list.assignedTo": "Asignada a"
+  "tasks.list.assignedTo": "Asignada a",
+  "common.required": "Campo obligatorio",
+  "common.maxLength": "No debe superar {{max}} caracteres",
+  "common.invalidJson": "Los datos adicionales deben ser un JSON válido.",
+  "common.cancel": "Cancelar",
+  "tasks.createTitle": "Crear tarea",
+  "tasks.editTitle": "Editar tarea",
+  "tasks.field.title": "Título",
+  "tasks.field.assignedUser": "Usuario asignado",
+  "tasks.field.status": "Estado",
+  "tasks.field.additionalData": "Datos adicionales (JSON)",
+  "tasks.placeholder.title": "Escribe el título de la tarea",
+  "tasks.placeholder.additionalData": "{\"priority\":\"High\"}",
+  "tasks.selectUser": "Selecciona un usuario",
+  "tasks.create": "Crear tarea",
+  "tasks.save": "Guardar cambios"
 }

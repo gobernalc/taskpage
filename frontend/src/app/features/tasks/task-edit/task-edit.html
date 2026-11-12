@@ -1,0 +1,72 @@
+<!-- Reactive form to edit a task. -->
+<section class="task-form">
+  <app-card [title]="'tasks.editTitle' | translate">
+    @if (loading()) {
+      <p class="task-form__state">{{ 'common.loading' | translate }}</p>
+    } @else {
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="field">
+          <label class="field__label" for="task-title">
+            {{ 'tasks.field.title' | translate }}
+          </label>
+          <input
+            id="task-title"
+            type="text"
+            class="field__control"
+            [class.is-invalid]="form.controls.title.touched && form.controls.title.invalid"
+            formControlName="title"
+            [placeholder]="'tasks.placeholder.title' | translate"
+          />
+          @if (form.controls.title.touched && form.controls.title.hasError('required')) {
+            <p class="field__error">{{ 'common.required' | translate }}</p>
+          }
+          @if (form.controls.title.touched && form.controls.title.hasError('maxlength')) {
+            <p class="field__error">{{ 'common.maxLength' | translate: { max: '200' } }}</p>
+          }
+        </div>
+
+        <app-select
+          [label]="'tasks.field.assignedUser' | translate"
+          fieldId="task-user"
+          [control]="form.controls.userId"
+          [error]="userIdError()"
+        >
+          <option value="" disabled>{{ 'tasks.selectUser' | translate }}</option>
+          @for (user of users(); track user.id) {
+            <option [value]="user.id">{{ user.name }}</option>
+          }
+        </app-select>
+
+        <div class="field">
+          <label class="field__label" for="task-additional-data">
+            {{ 'tasks.field.additionalData' | translate }}
+          </label>
+          <textarea
+            id="task-additional-data"
+            class="field__control"
+            rows="4"
+            [class.is-invalid]="form.controls.additionalData.touched && form.controls.additionalData.invalid"
+            formControlName="additionalData"
+            [placeholder]="'tasks.placeholder.additionalData' | translate"
+          ></textarea>
+          @if (form.controls.additionalData.touched && form.controls.additionalData.hasError('invalidJson')) {
+            <p class="field__error">{{ 'common.invalidJson' | translate }}</p>
+          }
+        </div>
+
+        @if (error()) {
+          <p class="task-form__error" role="alert">{{ error() }}</p>
+        }
+
+        <div class="form__actions">
+          <a class="btn" data-variant="ghost" routerLink="/tasks">
+            {{ 'common.cancel' | translate }}
+          </a>
+          <app-button type="submit" [disabled]="submitting()">
+            {{ 'tasks.save' | translate }}
+          </app-button>
+        </div>
+      </form>
+    }
+  </app-card>
+</section>
