@@ -49,14 +49,12 @@
     <ul class="task-list__items">
       @for (task of tasks(); track task.id) {
         <li class="task-list__item">
-          <div class="task-list__item-main">
-            <a class="task-list__item-title" [routerLink]="['/tasks', task.id, 'edit']">
-              {{ task.title }}
-            </a>
+          <a class="task-list__item-main" [routerLink]="['/tasks', task.id]">
+            <span class="task-list__item-title">{{ task.title }}</span>
             <app-badge [tone]="statusTone(task.status)">
               {{ statusKey(task.status) | translate }}
             </app-badge>
-          </div>
+          </a>
           <div class="task-list__item-user">
             <span class="task-list__item-label">{{ 'tasks.list.assignedTo' | translate }}</span>
             <span>{{ task.userName }}</span>

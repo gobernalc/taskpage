@@ -1,0 +1,89 @@
+/* Styles for the read-only task detail view. */
+
+.task-detail {
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+.task-detail__state {
+  margin: 0;
+  padding: var(--space-xl) 0;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.task-detail__error {
+  margin: 0;
+  padding: var(--space-md);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  background-color: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
+}
+
+.task-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.task-detail__title {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.task-detail__meta {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-lg);
+}
+
+.task-detail__row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.task-detail__row dt {
+  min-width: 8rem;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.task-detail__row dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.task-detail__section h4 {
+  margin: 0 0 var(--space-sm);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.task-detail__json {
+  margin: 0;
+  padding: var(--space-md);
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-muted);
+  font-size: 0.85rem;
+}
+
+.task-detail__empty {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.task-detail .form__actions {
+  margin-top: var(--space-lg);
+}

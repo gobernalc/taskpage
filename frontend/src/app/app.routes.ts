@@ -19,6 +19,16 @@ export const routes: Routes = [
       import('./features/tasks/task-edit/task-edit').then((module) => module.TaskEdit),
   },
   {
+    path: 'tasks/:id',
+    loadComponent: () =>
+      import('./features/tasks/task-detail/task-detail').then((module) => module.TaskDetail),
+  },
+  {
+    path: 'tasks/:id',
+    loadComponent: () =>
+      import('./features/tasks/task-detail/task-detail').then((module) => module.TaskDetail),
+  },
+  {
     path: 'users',
     loadComponent: () =>
       import('./features/users/user-list/user-list').then((module) => module.UserList),
