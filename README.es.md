@@ -176,6 +176,23 @@ dotnet test --logger "console;verbosity=detailed"
 Cada test imprime en consola **✅ si pasa** y **❌ si falla**, con descripción
 y un flujo legible del resultado de cada prueba.
 
+La suite del backend cubre:
+
+- `UserService`: creación válida, correo duplicado, normalización del correo (trim y
+  minúsculas), actualización, eliminación con y sin tareas asociadas, consulta por id,
+  búsqueda, ordenamiento y paginación.
+- `TaskService`: creación, usuario inexistente, JSON válido e inválido, actualización,
+  eliminación, transiciones de estado (rechazando la prohibida `Pending -> Done` y
+  permitiendo las demás), cambios de estado idempotentes, filtros, búsqueda,
+  ordenamiento y paginación.
+- Validadores: campos obligatorios, longitudes máximas, formato de correo, estado
+  inválido y documentos JSON inválidos.
+- Controladores: códigos `200`/`201`/`204`/`400`/`404`/`409`, forma de las respuestas
+  y validación de entrada.
+- `GlobalExceptionMiddleware`: mapeo a `ProblemDetails`, cabecera `X-Request-Id` y
+  correlación con `traceId`.
+- `HealthController`: `200` con la base de datos disponible y `503` cuando no responde.
+
 ### 5.2 Pruebas del frontend
 
 ```bash
