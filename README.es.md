@@ -326,6 +326,34 @@ por clave desde las plantillas — está prohibido codificar textos:
   textos de accesibilidad viven en los archivos de idioma; la API sigue devolviendo
   mensajes en inglés y el frontend traduce solo su propia interfaz.
 
+### 6.7 Funcionalidades de la interfaz
+
+El frontend funcional gestiona tareas y usuarios de extremo a extremo:
+
+- **Lista de tareas** ([`task-list.ts`](frontend/src/app/features/tasks/task-list/task-list.ts:1))
+  lista tareas con filtro de estado, búsqueda de título con debounce y paginación,
+  muestra la insignia de estado y el usuario asignado, y permite eliminar una tarea
+  y cambiar su estado en línea (rechazando la transición prohibida `Pending -> Done`).
+- **Creación y edición de tareas** ([`task-create.ts`](frontend/src/app/features/tasks/task-create/task-create.ts:1),
+  [`task-edit.ts`](frontend/src/app/features/tasks/task-edit/task-edit.ts:1)) son
+  formularios reactivos con título, selector de usuario asignado y datos adicionales
+  JSON opcionales, validados en el cliente antes de enviar.
+- **Lista de usuarios** ([`user-list.ts`](frontend/src/app/features/users/user-list/user-list.ts:1))
+  lista usuarios con búsqueda y paginación y permite eliminarlos.
+- **Formulario de usuario** ([`user-form.ts`](frontend/src/app/features/users/user-form/user-form.ts:1))
+  crea y edita usuarios con validación de nombre y correo.
+- **Componentes compartidos** ([`badge`](frontend/src/app/shared/components/badge/badge.ts:1),
+  [`button`](frontend/src/app/shared/components/button/button.ts:1),
+  [`card`](frontend/src/app/shared/components/card/card.ts:1),
+  [`select`](frontend/src/app/shared/components/select/select.ts:1) y
+  [`pagination`](frontend/src/app/shared/components/pagination/pagination.ts:1))
+  se reutilizan en cada funcionalidad en lugar de duplicar marcado.
+- **Gestión de errores** lee el `ProblemDetails` devuelto por la API y muestra un
+  mensaje legible sin exponer detalles internos.
+
+Rutas: `/tasks` (lista), `/tasks/new` (crear), `/tasks/:id/edit` (editar),
+`/users` (lista), `/users/new` (crear) y `/users/:id/edit` (editar).
+
 ## 7. Ramas y entrega
 
 El repositorio sigue **trunk-based development**:
@@ -367,7 +395,8 @@ git switch main && git pull --ff-only
   están completas, y están implementadas la **Fase 1 (esquema de base de datos)**,
   la **Fase 2 (capa de dominio y aplicación)**, la
   **Fase 3 (persistencia en SQL Server)**, la **Fase 4 (API REST con Swagger)**,
-  la **Fase 5 (pruebas unitarias del backend)** y la
-  **Fase 6 (base del frontend con diseño personalizado, i18n y servicios)**.
+  la **Fase 5 (pruebas unitarias del backend)**, la
+  **Fase 6 (base del frontend con diseño personalizado, i18n y servicios)** y la
+  **Fase 7 (gestión de tareas y usuarios en el frontend)**.
   Las capas de backend y frontend seguirán creciendo fase a fase según
   [`plans/design.md`](plans/design.md:1).
