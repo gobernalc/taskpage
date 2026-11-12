@@ -99,8 +99,8 @@ describe('TaskStatus', () => {
     expect(changed).toHaveBeenCalledWith(updated);
   });
 
-  /** Verifies that an API failure surfaces a readable error message. */
-  it('should surface the API error when the status change fails', () => {
+  /** Verifies that an API failure surfaces a readable error and restores the selector. */
+  it('should surface the API error and restore the previous status when the change fails', () => {
     tasksService.changeStatus.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 400, error: { detail: 'Invalid transition' } })),
     );
@@ -112,5 +112,6 @@ describe('TaskStatus', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Invalid transition');
+    expect(select.value).toBe(String(TaskState.Pending));
   });
 });
