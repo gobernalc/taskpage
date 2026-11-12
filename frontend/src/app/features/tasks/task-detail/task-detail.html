@@ -1,0 +1,66 @@
+<!-- Read-only task detail with its metadata and the link to the editor. -->
+<section class="task-detail">
+  <app-card [title]="'tasks.detailTitle' | translate">
+    @if (loading()) {
+      <p class="task-detail__state">{{ 'common.loading' | translate }}</p>
+    } @else if (error()) {
+      <p class="task-detail__error" role="alert">{{ error() }}</p>
+    } @else if (task(); as current) {
+      <div class="task-detail__header">
+        <h3 class="task-detail__title">{{ current.title }}</h3>
+        <app-badge [tone]="statusTone(current.status)">
+          {{ statusKey(current.status) | translate }}
+        </app-badge>
+      </div>
+
+      <dl class="task-detail__meta">
+        <div class="task-detail__row">
+          <dt>{{ 'tasks.list.assignedTo' | translate }}</dt>
+          <dd>{{ current.userName }}</dd>
+        </div>
+        <div class="task-detail__row">
+          <dt>{{ 'tasks.detail.createdAt' | translate }}</dt>
+          <dd>{{ formatDate(current.createdAt) }}</dd>
+        </div>
+        @if (current.updatedAt) {
+          <div class="task-detail__row">
+            <dt>{{ 'tasks.detail.updatedAt' | translate }}</dt>
+            <dd>{{ formatDate(current.updatedAt) }}</dd>
+          </div>
+        }
+      </dl>
+
+      <div class="task-detail__section">
+        <h4>{{ 'tasks.field.additionalData' | translate }}</h4>
+        @if (current.additionalData) {
+          <pre class="task-detail__json">{{ current.additionalData }}</pre>
+        } @else {
+          <p class="task-detail__empty">{{ 'tasks.detail.noAdditionalData' | translate }}</p>
+        }
+      </div>
+
+      <div class="form__actions">
+        <a class="btn" data-variant="ghost" routerLink="/tasks">
+          {{ 'tasks.detail.back' | translate }}
+        </a>
+        <app-button variant="danger" [disabled]="deleting()" (click)="requestDelete()">
+          {{ 'tasks.delete' | translate }}
+        </app-button>
+        <a class="btn" data-variant="primary" [routerLink]="['/tasks', current.id, 'edit']">
+          {{ 'tasks.edit' | translate }}
+        </a>
+      </div>
+    }
+  </app-card>
+</section>
+
+<app-confirm-dialog
+  [open]="confirmingDelete()"
+  [title]="deleteTitle()"
+  [message]="deleteMessage()"
+  [confirmLabel]="deleteLabel()"
+  [cancelLabel]="cancelLabel()"
+  [busy]="deleting()"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>

@@ -75,13 +75,18 @@ describe('TaskList', () => {
   }
 
   /** Verifies that the loaded tasks are rendered with their titles and users. */
-  it('should render the task list', async () => {
+  it('should render the task list with a link to each detail view', async () => {
     await createComponent();
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Design the login flow');
     expect(text).toContain('Release the API');
     expect(text).toContain('Luis Gómez');
     expect(text).toContain('Ana Pérez');
+
+    const detailLink = fixture.nativeElement.querySelector(
+      'a[href="/tasks/1"]',
+    ) as HTMLAnchorElement | null;
+    expect(detailLink?.textContent).toContain('Design the login flow');
   });
 
   /** Verifies that the empty state is shown when there are no tasks. */
