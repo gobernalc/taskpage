@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from './core/i18n/translate.pipe';
-import { TranslateService } from './core/i18n/translate.service';
+import { Language, TranslateService } from './core/i18n/translate.service';
 
 /** UI theme options. */
 type Theme = 'light' | 'dark';
@@ -9,7 +9,10 @@ type Theme = 'light' | 'dark';
 /** Storage key used to persist the selected theme. */
 const THEME_STORAGE_KEY = 'taskpage.theme';
 
-/** Root component: layout shell with theme and language switchers. */
+/** Storage key used to persist the sidebar collapsed state. */
+const SIDEBAR_STORAGE_KEY = 'taskpage.sidebarCollapsed';
+
+/** Root component: collapsible sidebar shell with theme and language controls. */
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
@@ -23,6 +26,15 @@ export class App {
   /** Currently active theme. */
   protected readonly theme = signal<Theme>(this.readStoredTheme());
 
+  /** Currently active language, exposed for the flag buttons. */
+  protected readonly language = this.translate.language;
+
+  /** Whether the dark theme is active, used to pick the control icon. */
+  protected readonly isDark = computed(() => this.theme() === 'dark');
+
+  /** Whether the sidebar is collapsed to an icon rail. */
+  protected readonly sidebarCollapsed = signal(this.readStoredSidebar());
+
   constructor() {
     this.applyTheme(this.theme());
   }
@@ -35,19 +47,32 @@ export class App {
     this.applyTheme(next);
   }
 
-  /** Toggles the UI language through the translation service. */
-  protected toggleLanguage(): void {
-    void this.translate.toggle();
+  /**
+   * Activates one of the supported UI languages.
+   * @param language Language selected through its flag button.
+   */
+  protected setLanguage(language: Language): void {
+    if (language === this.language()) {
+      return;
+    }
+    void this.translate.set(language);
   }
 
-  /** Label shown on the language switch button. */
-  protected languageLabel(): string {
-    return this.translate.language() === 'es' ? 'EN' : 'ES';
+  /** Toggles the sidebar between its expanded and collapsed states. */
+  protected toggleSidebar(): void {
+    const next = !this.sidebarCollapsed();
+    this.sidebarCollapsed.set(next);
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
   }
 
   /** Applies the theme as a data attribute on the root element. */
   private applyTheme(theme: Theme): void {
     document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  /** Reads the persisted sidebar state, defaulting to expanded. */
+  private readStoredSidebar(): boolean {
+    return localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
   }
 
   /** Reads the persisted theme, falling back to the system preference. */

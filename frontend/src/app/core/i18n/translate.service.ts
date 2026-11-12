@@ -23,7 +23,11 @@ export class TranslateService {
   readonly translations = signal<TranslationDictionary>({});
 
   constructor() {
-    void this.load(this.language());
+    this.applyDocumentLanguage(this.language());
+    void this.load(this.language()).catch(() => {
+      // The UI keeps rendering the keys instead of breaking when the dictionary fails.
+      console.error(`Failed to load translations for "${this.language()}".`);
+    });
   }
 
   /**
@@ -37,12 +41,25 @@ export class TranslateService {
     this.translations.set(dictionary);
   }
 
+  /**
+   * Activates the requested language, persists it and reloads its dictionary.
+   * @param language Language to activate.
+   */
+  async set(language: Language): Promise<void> {
+    this.language.set(language);
+    localStorage.setItem(STORAGE_KEY, language);
+    this.applyDocumentLanguage(language);
+    try {
+      await this.load(language);
+    } catch {
+      // Keep the previous dictionary so a failed request does not wipe the UI.
+      console.error(`Failed to load translations for "${language}".`);
+    }
+  }
+
   /** Switches between Spanish and English and reloads the dictionary. */
   async toggle(): Promise<void> {
-    const next: Language = this.language() === 'es' ? 'en' : 'es';
-    this.language.set(next);
-    localStorage.setItem(STORAGE_KEY, next);
-    await this.load(next);
+    await this.set(this.language() === 'es' ? 'en' : 'es');
   }
 
   /**
@@ -59,6 +76,11 @@ export class TranslateService {
       }
     }
     return text;
+  }
+
+  /** Keeps the document language in sync for assistive technologies. */
+  private applyDocumentLanguage(language: Language): void {
+    document.documentElement.lang = language;
   }
 
   /** Reads the persisted language, defaulting to Spanish. */
