@@ -94,7 +94,11 @@ public class GlobalExceptionMiddleware
         context.Response.ContentType = "application/problem+json";
         context.Response.Headers["X-Request-Id"] = traceId;
 
-        await context.Response.WriteAsJsonAsync(problem, JsonOptions, context.RequestAborted);
+        await context.Response.WriteAsJsonAsync(
+            problem,
+            JsonOptions,
+            "application/problem+json",
+            context.RequestAborted);
     }
 
     /// <summary>Maps an exception to its HTTP status and ProblemDetails title.</summary>
