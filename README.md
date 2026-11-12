@@ -29,9 +29,9 @@ is exposed and documented in **Swagger**.
 
 ```text
 taskpage/
-├── .gitignore
-├── README.md
-├── README.es.md                # Spanish mirror of this document
+├── .github/
+│   └── workflows/
+│       └── ci.yml              # backend and frontend continuous integration
 ├── database/
 │   └── schema.sql              # single idempotent SQL script
 ├── backend/                    # .NET solution (Clean Architecture)
@@ -42,7 +42,17 @@ taskpage/
 │       ├── TaskPage.Api/
 │       ├── TaskPage.Application.Tests/
 │       └── TaskPage.Api.Tests/
-└── frontend/                   # Angular application
+├── frontend/                   # Angular application
+│   ├── public/
+│   │   └── logo.svg            # brand mark used by the icon and the sidebar
+│   └── src/
+│       ├── assets/i18n/        # es.json (default) and en.json
+│       └── app/
+│           ├── core/           # models, HTTP, i18n and error handling
+│           ├── features/       # users and tasks (lazy loaded)
+│           └── shared/         # reusable components and the confirm dialog
+├── README.md
+└── README.es.md                # Spanish mirror of this document
 ```
 
 ---
@@ -75,6 +85,11 @@ sqlcmd -S localhost -E -i database\schema.sql
 - `-S localhost`: default instance. If your instance is named, use
   `localhost\INSTANCE_NAME`.
 - `-E`: Windows authentication (current account as `sysadmin`).
+- **`-f 65001` (UTF-8):** `schema.sql` is stored as UTF-8. The classic ODBC
+  `sqlcmd` reads files with the system ANSI code page by default, so add
+  `-f 65001` (`sqlcmd -S localhost -E -f 65001 -i database\schema.sql`) or run
+  the script from the VS Code mssql extension. The modern Go-based `sqlcmd`
+  (v1) reads UTF-8 by default.
 
 The script creates the `TaskPageDb` database (if it does not exist), the `Users`
 and `Tasks` tables with their primary/foreign keys, `CHECK`, `DEFAULT` and audit
@@ -151,16 +166,22 @@ cd backend/src/TaskPage.Api
 dotnet run
 ```
 
-Open Swagger at: <http://localhost:5000/swagger> (or the port shown in the console).
+Open Swagger at: <http://localhost:5017/swagger> (or the port shown in the console).
 
 ### 4.2 Frontend
 
 ```bash
 cd frontend
-ng serve
+npm start
 ```
 
 Open the application at <http://localhost:4200>.
+
+Both servers run at the same time, each one in its own terminal: the frontend calls
+the API at `http://localhost:5017/api`. In development the API only accepts the
+Angular dev server origin through CORS, configured in `Cors:AllowedOrigins` inside
+`appsettings.Development.json`. HTTPS redirection is enabled outside development so
+the local plain-HTTP port keeps working.
 
 ---
 
@@ -186,8 +207,8 @@ The backend suite covers:
   idempotent status changes, filters, search, sorting and pagination.
 - Validators: required fields, maximum lengths, email format, invalid status and
   invalid JSON documents.
-- Controllers: `200`/`201`/`204`/`400`/`404`/`409` status codes, response shapes and
-  input validation.
+- Controllers: `200`/`201`/`204`/`400`/`404`/`409` status codes, response shapes,
+  `Location` headers and input validation.
 - `GlobalExceptionMiddleware`: `ProblemDetails` mapping, `X-Request-Id` header and
   `traceId` correlation.
 - `HealthController`: `200` with the database available and `503` when it is unavailable.
@@ -207,18 +228,36 @@ The frontend suite covers:
 - `UsersService`/`TasksService`: CRUD requests, query params, paged response
   mapping and network error responses.
 - `TranslateService`/`TranslatePipe`: loading `es.json`/`en.json`, language
-  change and persistence, missing keys and interpolation.
-- `TaskList`: rendering, status filter, debounced title search, pagination,
-  empty state, deletion with confirmation and load errors.
+  change and persistence, missing keys, interpolation, accent preservation and
+  keeping the previous dictionary when a request fails.
+- `TaskList`: rendering, detail links, status filter, debounced title search,
+  pagination, empty state, deletion with confirmation and load errors.
+- `TaskDetail`: rendering, metadata, additional JSON data, invalid ids, deletion
+  confirmation, cancellation and load errors.
 - `TaskCreate`/`TaskEdit`: user loading, reactive validation, submit payloads,
   JSON validation and API errors.
-- `TaskStatus`: the forbidden `Pending -> Done` transition and the allowed
-  transitions with their API error handling.
-- `UserList`/`UserForm`: rendering, search, deletion and reactive validation,
-  creation and edition flows.
+- `TaskStatus`: the forbidden `Pending -> Done` transition, the allowed
+  transitions, API error handling and selector value restoration.
+- `UserList`/`UserForm`: rendering, search, deletion with confirmation and
+  reactive validation, creation and edition flows.
+- `ConfirmDialog`: accessible alert dialog content, confirm and cancel outputs,
+  Escape and backdrop dismissal, busy state and initial focus.
 - `Pagination` and `Badge`: boundary navigation and status tone hooks.
-- Theme and accessibility: theme toggle persistence, navigation and control
-  accessible labels and status contrast hooks.
+- Application shell: sidebar rendering, theme toggle persistence, language
+  switching with flags, ignored active language, accessible labels and recovery
+  from a failed dictionary request.
+
+### 5.3 Continuous integration
+
+The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push to
+`main` and on every pull request targeting `main`. It has two independent jobs:
+
+- `backend`: `dotnet restore`, `dotnet build --no-restore` and
+  `dotnet test --no-build --logger "console;verbosity=detailed"` on .NET 10.
+- `frontend`: `npm ci`, `npm run build` and `ng test --watch=false` on Node 22.
+
+Both jobs are required status checks for the merge into `main`. NuGet and npm
+caches keep the pipeline in the minutes range, and the ✅/❌ output is preserved.
 
 ---
 
@@ -273,7 +312,14 @@ relationships and indexes stay aligned with [`database/schema.sql`](database/sch
   (single idempotent script): EF Core is used for queries and commands, not to
   generate the schema.
 
-### 6.4 API documentation
+### 6.4 Validation (FluentValidation)
+
+Input DTOs are validated with **FluentValidation** before reaching the services:
+required fields, maximum lengths, email format, positive identifiers, enum values,
+valid status transitions and valid JSON documents. Validation is centralized, the
+API returns readable messages in English and entities are never exposed.
+
+### 6.5 API documentation (Swagger)
 
 The REST API is exposed and documented in **Swagger** (UI at `/swagger`, JSON at
 `/swagger/v1/swagger.json`). Every endpoint is testable from the Swagger UI and
@@ -294,7 +340,7 @@ documents its request models, query parameters and response codes.
 | `PUT`    | `/api/tasks/{id}/status` | Changes a task status respecting the transition rule (200, 400, 404).   |
 | `GET`    | `/api/health`            | Reports the service and database health (200, 503).                     |
 
-Cross-cutting behavior:
+### 6.6 Logging and observability
 
 - A global [`GlobalExceptionMiddleware`](backend/src/TaskPage.Api/Middleware/GlobalExceptionMiddleware.cs:1)
   maps domain and validation failures to `ProblemDetails` (400/404/409/500)
@@ -302,13 +348,44 @@ Cross-cutting behavior:
 - Error responses include the `X-Request-Id` header and the correlation id in
   `ProblemDetails.Extensions` under the `traceId` key.
 - **Serilog** writes structured logs to the console and `logs/taskpage-.log`,
-  correlating every event with the request `TraceIdentifier` and masking
-  sensitive data.
+  correlating every event with the request `TraceIdentifier`. Emails are masked and
+  `AdditionalData` is never fully dumped.
 
-### 6.5 Visual design
+### 6.7 Security
 
-The frontend applies a custom navy/deep blue palette inspired by the propiedapp
-project, avoiding a generic look:
+- **Parameterized** queries through EF Core (no SQL concatenation).
+- **Input validation** in DTOs with FluentValidation and length limits.
+- **No internal details** exposed to the client: only `ProblemDetails`.
+- **No sensitive data** in logs: masked emails and no `AdditionalData` payloads.
+- **HTTPS** enabled outside development; `TrustServerCertificate=True` only in
+  development.
+- **Restricted CORS**: only the configured Angular dev origin in development.
+- **Dependency pin** for the transitive `Microsoft.Data.SqlClient` package affected
+  by known advisories.
+- Response control with `[ProducesResponseType]` and consistent HTTP codes.
+
+### 6.8 Testing strategy
+
+- Backend: **xUnit** with service, validator, controller, middleware and health
+  check tests.
+- Frontend: **Vitest 4.1.12** with a custom reporter that prints ✅/❌ per spec.
+- Golden rule: **fix the app, not the test**. Every change must keep both suites
+  green before delivery.
+- Scenarios covered: positive, negative, incomplete data, nulls, wrong values,
+  special characters, limits, state transitions, idempotency and failure recovery.
+
+### 6.9 Database
+
+- The whole schema lives in **one idempotent script** (`database/schema.sql`) that
+  can run N times without side effects.
+- Primary/foreign keys, `CHECK` constraints, `DEFAULT` values, audit columns,
+  clustered/nonclustered/unique indexes and idempotent seed data are included.
+- JSON is validated with `ISJSON`, read and filtered with `JSON_VALUE`, extracted
+  with `JSON_QUERY`, expanded with `OPENJSON` and updated with `JSON_MODIFY`.
+
+### 6.10 Visual design
+
+The frontend applies a custom navy/deep blue palette with a strong visual identity.
 
 - Design tokens live in [`frontend/src/styles.scss`](frontend/src/styles.scss:1)
   as CSS variables: colors, 2-stop gradients, spacing, radii, shadows, motion and
@@ -318,33 +395,43 @@ project, avoiding a generic look:
   `[data-theme="dark"]` selector, honors `prefers-color-scheme` by default and
   persists the user choice in `localStorage` (non-sensitive key).
 - The application shell ([`app.html`](frontend/src/app/app.html:1),
-  [`app.scss`](frontend/src/app/app.scss:1)) provides a sticky header with the
-  brand, primary navigation, theme and language switchers, a main outlet and a
-  footer, with subtle transitions and accessible focus states.
+  [`app.scss`](frontend/src/app/app.scss:1)) is a **collapsible sidebar** with a
+  brand mark, icon navigation, theme and language controls, a main outlet and a
+  footer. The collapsed state is persisted, and the layout adds gradients, shadows,
+  subtle transitions and accessible focus states.
+- The **confirmation dialog** ([`confirm-dialog.ts`](frontend/src/app/shared/components/confirm-dialog/confirm-dialog.ts:1))
+  is a centered modal with an accent line, dimmed backdrop, focus trap, initial
+  focus on the safe action, Escape and backdrop dismissal.
 
-### 6.6 Internationalization
+### 6.11 Internationalization
 
 Every visible UI text is centralized in `frontend/src/assets/i18n/es.json`
 (default language, Spanish) and `frontend/src/assets/i18n/en.json`, and referenced
 by key from the templates — hardcoding texts is forbidden:
 
 - A custom [`TranslateService`](frontend/src/app/core/i18n/translate.service.ts:1)
-  loads the active dictionary, exposes it as a signal and persists the language in
-  `localStorage` (non-sensitive key).
+  loads the active dictionary, exposes it as a signal, persists the language in
+  `localStorage` (non-sensitive key), keeps `document.documentElement.lang` in sync
+  and preserves the previous dictionary when a request fails.
 - A standalone [`TranslatePipe`](frontend/src/app/core/i18n/translate.pipe.ts:1)
   renders keys in templates with simple `{{name}}` interpolation.
+- The language switcher uses accessible flag buttons for Spanish and English.
 - States (`Pending`, `InProgress`, `Done`), buttons, titles, placeholders and
   accessibility texts live in the language files; the API keeps returning English
   messages and the frontend translates only its own interface.
 
-### 6.7 Interface features
+### 6.12 Interface features
 
 The functional frontend manages tasks and users end to end:
 
 - **Task list** ([`task-list.ts`](frontend/src/app/features/tasks/task-list/task-list.ts:1))
   lists tasks with a status filter, debounced title search and pagination, shows
-  the status badge and the assigned user, and allows deleting a task and changing
-  its status inline (rejecting the forbidden `Pending -> Done` transition).
+  the status badge and the assigned user, links each title to its detail view and
+  allows deleting a task or changing its status inline (rejecting the forbidden
+  `Pending -> Done` transition).
+- **Task detail** ([`task-detail.ts`](frontend/src/app/features/tasks/task-detail/task-detail.ts:1))
+  shows the full task, assigned user, localized audit timestamps and additional JSON
+  data, with shortcuts to edit or delete it.
 - **Task creation and edition** ([`task-create.ts`](frontend/src/app/features/tasks/task-create/task-create.ts:1),
   [`task-edit.ts`](frontend/src/app/features/tasks/task-edit/task-edit.ts:1)) are
   reactive forms with title, an assigned-user selector and optional JSON additional
@@ -353,17 +440,75 @@ The functional frontend manages tasks and users end to end:
   lists users with search and pagination and allows deleting them.
 - **User form** ([`user-form.ts`](frontend/src/app/features/users/user-form/user-form.ts:1))
   creates and edits users with name and email validation.
-- **Shared components** ([`badge`](frontend/src/app/shared/components/badge/badge.ts:1),
-  [`button`](frontend/src/app/shared/components/button/button.ts:1),
-  [`card`](frontend/src/app/shared/components/card/card.ts:1),
-  [`select`](frontend/src/app/shared/components/select/select.ts:1) and
-  [`pagination`](frontend/src/app/shared/components/pagination/pagination.ts:1))
-  are reused by every feature instead of duplicating markup.
+- **Destructive actions** always go through the accessible confirmation dialog and
+  never through a native prompt.
+- **Shared components** (`badge`, `button`, `card`, `select`, `pagination` and
+  `confirm-dialog`) are reused by every feature instead of duplicating markup.
 - **Error handling** reads the `ProblemDetails` payload returned by the API and
   shows a readable message without exposing internal details.
 
-Routes: `/tasks` (list), `/tasks/new` (create), `/tasks/:id/edit` (edit),
-`/users` (list), `/users/new` (create) and `/users/:id/edit` (edit).
+Routes: `/tasks` (list), `/tasks/new` (create), `/tasks/:id` (detail),
+`/tasks/:id/edit` (edit), `/users` (list), `/users/new` (create) and
+`/users/:id/edit` (edit).
+
+### 6.13 Additional proposals implemented
+
+The following features go beyond the original specification and are fully
+implemented:
+
+- **Expanded CRUD**: update and delete for users and tasks, plus task status changes.
+- **Pagination, search and sorting** for both listings, with a paged result model.
+- **Audit columns** (`CreatedAt`, `UpdatedAt`) in the database and in the API responses.
+- **Email normalization and uniqueness**, compared case-insensitively.
+- **JSON in SQL Server** for additional task data, with validation and native functions.
+- **EF Core 10** persistence with typed mappings and parameterized queries.
+- **FluentValidation** for centralized input validation with English messages.
+- **Serilog** structured logging with `TraceIdentifier` correlation and PII masking.
+- **`X-Request-Id` header** and `traceId` in `ProblemDetails` for request correlation.
+- **Database health check** at `GET /api/health`.
+- **Light/dark theme** with design tokens, system preference support and persistence.
+- **Spanish/English internationalization** with flag buttons, persisted language and
+  document language synchronization.
+- **Collapsible sidebar** with icon rail, brand mark, persisted state and accessible
+  controls.
+- **Confirmation dialog** for destructive actions with focus management, Escape and
+  backdrop dismissal.
+- **Task detail page** with audit timestamps and additional JSON data.
+- **Automated tests** with xUnit and Vitest, including the ✅/❌ emoji reporter.
+- **Continuous integration** with GitHub Actions (backend and frontend jobs).
+- **Development CORS configuration** driven by environment settings.
+- **Security hardening**: restricted CORS, no internal error details, masked PII and a
+  pinned patched dependency.
+- **Accessibility**: semantic landmarks, labels, focus states, focus trap and status
+  contrast hooks.
+- **Responsive layout** with a mobile-friendly sidebar and token-based spacing.
+- **Bilingual README** (`README.md` and `README.es.md`) kept in sync.
+
+### 6.14 Known limitations and next steps
+
+Each point is a future feature with its benefit; nothing here is partially enabled:
+
+- **Authentication and authorization with JWT/OIDC** (Microsoft.Identity.Web + Entra
+  ID, role policies and `[Authorize]` per controller): it controls who creates, edits
+  and deletes, and leaves the system ready for auditing.
+- **Optimistic concurrency with `rowversion`/ETag**: it prevents two users from
+  overwriting the same task (lost update) and returns 409/412 when it happens.
+- **Versioned migrations executed by the pipeline** (EF Core Migrations, DbUp or
+  Flyway): repeatable and traceable deployments without manual steps.
+- **Expanded observability**: `live`/`ready` health checks, a central log sink and
+  distributed traces (OpenTelemetry/Application Insights).
+- **API versioning with `Asp.Versioning`**: evolution without breaking clients.
+- **End-to-end tests with Playwright and automated accessibility with `axe-core`**:
+  they cover the full flow and status contrast.
+- **Rate limiting and security headers** (HSTS, CSP and `X-Content-Type-Options`):
+  they protect the exposed Swagger and API.
+- **Separate environments with managed secrets** (Key Vault) and reproducible
+  container deployment.
+- **Public demo at a single URL**: the optional deployment phase was not executed;
+  the app keeps running locally with `ng serve` + `dotnet run`, and publishing the
+  Angular build from `wwwroot` remains the documented next step.
+
+---
 
 ## 7. Branching and delivery
 
@@ -393,6 +538,8 @@ git push -u origin feat/task-status-transition
 git switch main && git pull --ff-only
 ```
 
+---
+
 ## 8. Notes
 
 - The database schema lives in a **single idempotent script**
@@ -401,10 +548,9 @@ git switch main && git pull --ff-only
   on their own SQL Server instance.
 - The frontend test runner is **Vitest 4.1.12** (configured in `angular.json` with
   the custom reporter `vitest.emoji-reporter.ts`, which prints ✅/❌ per spec).
-- Project status: the environment and project structure are set up, and
-  **Phase 1 (database schema)**, **Phase 2 (domain and application layer)**,
-  **Phase 3 (SQL Server persistence)**, **Phase 4 (REST API with Swagger)**,
-  **Phase 5 (backend unit tests)**, **Phase 6 (frontend base with custom
-  design, i18n and services)** and **Phase 7 (task and user management in the
-  frontend)** are implemented. Backend and frontend layers will keep growing
-  phase by phase according to [`plans/design.md`](plans/design.md:1).
+- Project status: **phases 1 to 8 are implemented** (database, domain and
+  application layer, SQL Server persistence, REST API with Swagger, backend tests,
+  frontend base, functional frontend and frontend tests). The final integration and
+  documentation phase is complete, including the collaboration menu, theme,
+  language, confirmation dialog and task detail additions. The optional demo
+  deployment (phase 10) remains documented as a next step with its benefit.
