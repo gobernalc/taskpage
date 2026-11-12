@@ -1,0 +1,88 @@
+<!-- Task listing with filters, search, pagination and deletion. -->
+<section class="task-list">
+  <header class="task-list__header">
+    <h1 class="task-list__title">{{ 'tasks.title' | translate }}</h1>
+    <a class="btn" data-variant="primary" routerLink="/tasks/new">
+      {{ 'tasks.new' | translate }}
+    </a>
+  </header>
+
+  <div class="task-list__filters">
+    <div class="field">
+      <label class="field__label" for="task-search">
+        {{ 'filters.searchTasks' | translate }}
+      </label>
+      <input
+        id="task-search"
+        type="search"
+        class="field__control"
+        (input)="onSearchChange($event)"
+        [attr.aria-label]="'filters.searchTasks' | translate"
+      />
+    </div>
+    <div class="field">
+      <label class="field__label" for="task-status-filter">
+        {{ 'filters.status' | translate }}
+      </label>
+      <select
+        id="task-status-filter"
+        class="field__control"
+        [value]="statusFilter()"
+        (change)="onStatusChange($event)"
+      >
+        @for (option of statusOptions; track option.value) {
+          <option [value]="option.value">{{ option.key | translate }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (error()) {
+    <p class="task-list__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="task-list__state">{{ 'common.loading' | translate }}</p>
+  } @else if (tasks().length === 0) {
+    <p class="task-list__state">{{ 'tasks.empty' | translate }}</p>
+  } @else {
+    <ul class="task-list__items">
+      @for (task of tasks(); track task.id) {
+        <li class="task-list__item">
+          <div class="task-list__item-main">
+            <a class="task-list__item-title" [routerLink]="['/tasks', task.id, 'edit']">
+              {{ task.title }}
+            </a>
+            <app-badge [tone]="statusTone(task.status)">
+              {{ statusKey(task.status) | translate }}
+            </app-badge>
+          </div>
+          <div class="task-list__item-user">
+            <span class="task-list__item-label">{{ 'tasks.list.assignedTo' | translate }}</span>
+            <span>{{ task.userName }}</span>
+          </div>
+          <div class="task-list__item-actions">
+            <app-task-status [task]="task" (changed)="onTaskChanged($event)" />
+            <a class="btn" data-variant="secondary" [routerLink]="['/tasks', task.id, 'edit']">
+              {{ 'tasks.edit' | translate }}
+            </a>
+            <app-button
+              variant="danger"
+              [disabled]="deleting() === task.id"
+              (click)="deleteTask(task)"
+            >
+              {{ 'tasks.delete' | translate }}
+            </app-button>
+          </div>
+        </li>
+      }
+    </ul>
+
+    <app-pagination
+      [page]="page()"
+      [totalPages]="totalPages()"
+      [totalItems]="totalItems()"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</section>
