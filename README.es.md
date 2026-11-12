@@ -293,6 +293,39 @@ Comportamiento transversal:
   correlacionando cada evento con el `TraceIdentifier` de la petición y enmascarando
   los datos sensibles.
 
+### 6.5 Diseño visual
+
+El frontend aplica una paleta personalizada azul marino/azul profundo inspirada
+en el proyecto propiedapp, evitando un aspecto genérico:
+
+- Los design tokens viven en [`frontend/src/styles.scss`](frontend/src/styles.scss:1)
+  como variables CSS: colores, degradados de 2 paradas, espaciados, radios,
+  sombras, movimiento y tipografía. Los componentes consumen las variables, de
+  modo que no se codifica ningún color, espaciado, radio o degradado.
+- Un tema claro/oscuro conmutable sobrescribe los tokens mediante el selector
+  `[data-theme="dark"]`, respeta `prefers-color-scheme` por defecto y persiste la
+  elección en `localStorage` (clave no sensible).
+- El shell de la aplicación ([`app.html`](frontend/src/app/app.html:1),
+  [`app.scss`](frontend/src/app/app.scss:1)) aporta una cabecera fija con la
+  marca, la navegación principal, los conmutadores de tema e idioma, una zona
+  principal y un pie, con transiciones sutiles y estados de foco accesibles.
+
+### 6.6 Internacionalización
+
+Todo texto visible de la UI se centraliza en `frontend/src/assets/i18n/es.json`
+(idioma por defecto, español) y `frontend/src/assets/i18n/en.json`, y se referencia
+por clave desde las plantillas — está prohibido codificar textos:
+
+- Un [`TranslateService`](frontend/src/app/core/i18n/translate.service.ts:1)
+  personalizado carga el diccionario activo, lo expone como signal y persiste el
+  idioma en `localStorage` (clave no sensible).
+- Un [`TranslatePipe`](frontend/src/app/core/i18n/translate.pipe.ts:1)
+  independiente renderiza las claves en las plantillas con interpolación simple
+  `{{name}}`.
+- Los estados (`Pending`, `InProgress`, `Done`), botones, títulos, placeholders y
+  textos de accesibilidad viven en los archivos de idioma; la API sigue devolviendo
+  mensajes en inglés y el frontend traduce solo su propia interfaz.
+
 ## 7. Ramas y entrega
 
 El repositorio sigue **trunk-based development**:
@@ -333,6 +366,8 @@ git switch main && git pull --ff-only
 - Estado del proyecto: la configuración del entorno y la estructura del proyecto
   están completas, y están implementadas la **Fase 1 (esquema de base de datos)**,
   la **Fase 2 (capa de dominio y aplicación)**, la
-  **Fase 3 (persistencia en SQL Server)** y la
-  **Fase 4 (API REST con Swagger)**. Las capas de backend y frontend
-  seguirán creciendo fase a fase según [`plans/design.md`](plans/design.md:1).
+  **Fase 3 (persistencia en SQL Server)**, la **Fase 4 (API REST con Swagger)**,
+  la **Fase 5 (pruebas unitarias del backend)** y la
+  **Fase 6 (base del frontend con diseño personalizado, i18n y servicios)**.
+  Las capas de backend y frontend seguirán creciendo fase a fase según
+  [`plans/design.md`](plans/design.md:1).
