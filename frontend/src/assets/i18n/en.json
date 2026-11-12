@@ -1,6 +1,7 @@
 {
   "app.title": "TaskPage",
   "app.subtitle": "Internal task management",
+  "nav.title": "Main navigation",
   "nav.tasks": "Tasks",
   "nav.users": "Users",
   "theme.toggle": "Toggle theme",
